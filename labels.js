@@ -1,6 +1,6 @@
-import REGISTERED from './registered.json' assert {type: 'json'};
-import REVERSE from './reverse.json' assert {type: 'json'};
+import {readFileSync} from 'node:fs';
 
-export {REVERSE, REGISTERED};
-
-export default [...new Set([REGISTERED, REVERSE].flat().flatMap(s => s.split('.')))];
+// these are guarenteed to be unique and stop-free
+export function read_labels() {
+	return JSON.parse(readFileSync(new URL('./labels.json', import.meta.url)));
+}
