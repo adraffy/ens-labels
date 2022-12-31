@@ -10,5 +10,14 @@ for (let label of LABELS) {
 	if (len >= max) len = max_key;	
 	tally[len] = (tally[len] ?? 0) + 1;
 }
-console.log(tally);
-console.log(LABELS.length);
+
+let count = new Intl.NumberFormat('en-US').format(LABELS.length);
+let date = new Date().toJSON().split('T')[0];
+
+console.log(`\`${count}\` unique, stop-free labels as of \`${date}\``);
+//console.log(tally);
+console.log(`| N | # | % |`);
+console.log(`| :--- | ---: | ---: |`);
+Object.entries(tally).forEach(([k, v]) => {
+	console.log(`| ${k} | ${v} | ${(100*v/LABELS.length).toFixed(4)}% |`);
+});
