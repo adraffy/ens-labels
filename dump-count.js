@@ -1,10 +1,21 @@
 import {read_labels} from './labels.js';
 import {readFileSync, writeFileSync} from 'node:fs';
 
+let mode;
+let max = 30;
+let args = process.argv.slice(2).filter(arg => {
+	if (arg === 'md' || arg === 'save') {
+		mode = arg;
+	} else if (/^\d+$/.test(arg)) {
+		max = parseInt(arg);
+	} else {
+		return true;
+	}
+});
+
 const LABELS = read_labels();
 
 let tally = {};
-let max = 30;
 let max_key = `${max}+`;
 for (let label of LABELS) {
 	let len = [...label].length;
@@ -17,20 +28,22 @@ let date = new Date().toJSON().split('T')[0];
 
 let summary = `\`${count}\` unique, stop-free labels as of \`${date}\``;
 
-let table = [
-	`| N | # | % |`,
-	`| :--- | ---: | ---: |`,
-	...Object.entries(tally).map(([k, v]) => {
-		return `| ${k} | ${v} | ${(100*v/LABELS.length).toFixed(4)}% |`;
-	})
-].join('\n');
+function make_md_table() {
+	return [
+		`| N | # | % |`,
+		`| :--- | ---: | ---: |`,
+		...Object.entries(tally).map(([k, v]) => {
+			return `| ${k} | ${v} | ${(100*v/LABELS.length).toFixed(4)}% |`;
+		})
+	].join('\n');
+}
 
 console.log(summary);
 
-if (process.argv[2] === 'save') {
+if (mode === 'save') {
 	let file = new URL('./README.md', import.meta.url);
 	let text = readFileSync(file, {encoding: 'utf-8'});
-	let vars = {summary, table};
+	let vars = {summary, table: make_md_table()};
 	text = text.replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gmsu, (_, k) => {
 		let value = vars[k];
 		if (!value) throw new Error(`expected var: "${k}"`);
@@ -38,6 +51,12 @@ if (process.argv[2] === 'save') {
 	});
 	writeFileSync(file, text);
 	console.log(`Updated: ${file}`);
+} else if (mode === 'md') {
+	console.log(make_md_table());
 } else {
-	console.log(table);
+	let pad = Math.max(...Object.values(tally)).toString().length;
+	let perc = 4;
+	Object.entries(tally).forEach(([k, v]) => {
+		console.log(`${k.padStart(max_key.length)} ${v.toString().padStart(pad)} ${(100*v/LABELS.length).toFixed(perc).padStart(4+perc)}%`);
+	});
 }
