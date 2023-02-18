@@ -1,3 +1,6 @@
 {
-	"type": "module"
+	"type": "module",
+	"scripts": {
+		"update": "node dump-count.js save"
+	}
 }
