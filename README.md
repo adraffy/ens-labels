@@ -2,15 +2,16 @@
 
 <!-- summary -->
 `2,500,054` unique, stop-free labels as of `2023-02-26`
+ * [`36.3MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)
 <!-- /summary -->
+
+![Plot](plot.png)
 
 ```Javascript
 import {read_labels} from './label.js';
 
 let labels = read_labels(); // string[]
 ```
-
-![Plot](plot.png)
 
 ## Length Distribution
 

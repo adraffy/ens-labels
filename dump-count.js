@@ -1,5 +1,5 @@
 import {read_labels} from './labels.js';
-import {readFileSync, writeFileSync} from 'node:fs';
+import {readFileSync, writeFileSync, statSync} from 'node:fs';
 
 let mode;
 let max = 30;
@@ -26,7 +26,10 @@ for (let label of LABELS) {
 let count = new Intl.NumberFormat('en-US').format(LABELS.length);
 let date = new Date().toJSON().split('T')[0];
 
-let summary = `\`${count}\` unique, stop-free labels as of \`${date}\``;
+let size_mb = statSync(new URL('./labels.json', import.meta.url)).size / (1<<20);
+
+let summary = `\`${count}\` unique, stop-free labels as of \`${date}\`
+ * [\`${size_mb.toFixed(1)}MB\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)`;
 
 function make_md_table() {
 	return [
@@ -38,7 +41,7 @@ function make_md_table() {
 	].join('\n');
 }
 
-console.log(summary);
+console.log({count, date, size_mb});
 
 if (mode === 'save') {
 	let file = new URL('./README.md', import.meta.url);
