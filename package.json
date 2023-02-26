@@ -1,4 +1,9 @@
 {
+	"description": "Unique ENS Labels",
+	"keywords": [
+	  "ENS",
+	  "Ethereum"
+	],
 	"type": "module",
 	"scripts": {
 		"table": "node dump-count.js save",
