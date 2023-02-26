@@ -1,6 +1,8 @@
 {
 	"type": "module",
 	"scripts": {
-		"update": "node dump-count.js save"
+		"table": "node dump-count.js save",
+		"plot": "wolframscript CreatePlot.wls",
+		"update": "npm run table && run npm plot"
 	}
 }
