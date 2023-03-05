@@ -1,13 +1,16 @@
 {
 	"description": "Unique ENS Labels",
 	"keywords": [
-	  "ENS",
-	  "Ethereum"
+		"ENS",
+		"Ethereum"
 	],
 	"type": "module",
 	"scripts": {
 		"table": "node dump-count.js save",
 		"plot": "wolframscript CreatePlot.wls",
-		"update": "npm run table && run npm plot"
+		"update": "npm run table && npm run plot"
+	},
+	"devDependencies": {
+		"@adraffy/keccak": "^1.3.0"
 	}
 }
