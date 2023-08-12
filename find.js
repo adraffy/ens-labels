@@ -19,7 +19,7 @@ if (!args.length) {
 	process.exit(1);
 }
 
-let hash = Buffer.from(bytes_from_hex(args[0]));
+let hash = bytes_from_hex(args[0]);
 if (hash.length !== 32) {
 	console.error('expected 32-byte hash');
 	process.exit(1);
