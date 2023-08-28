@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENS Labels</title>
+<style>
+.hide {
+	display: none !important;
+}
+button {
+	cursor: pointer;
+}
+body {
+	margin: 3rem;
+	background: #eee;
+	overflow-y: scroll;
+}
+header {
+	display: flex;
+}
+header h1 {
+	flex: 1;
+	margin: 0;
+}
+#github {
+	text-align: right;
+}
+#links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	margin-top: 4px;
+	gap: 2px 8px;
+}
+#links .code {
+	font-family: monospace;
+}
+#input {
+	margin-top: 16px;
+}
+#name_field {
+	box-sizing: border-box;
+	width: 100%;
+	padding: 8px;
+	font-size: 16px;
+	font-family: monospace;
+}
+#examples {
+	margin-top: 16px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	font-size: 14px;
+}
+progress {
+	width: 100%;
+	margin: 8px 0;
+}
+main:empty {
+	display: none;
+}
+#input + main {
+	margin-top: 16px;
+}
+main {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 36px;
+}
+#error {
+	background-color: #fcc;
+	padding: 8px 16px;
+	font-size: 16px;
+	border-radius: 16px;
+	font-size: 18px;
+}
+#plot {
+	width: 100%;
+}
+footer {
+	text-align: center;
+	color: #666;
+	margin-top: 1rem;
+	margin-bottom: 0.5rem;
+}
+@media only screen and (max-width: 800px) { 
+	body {
+		margin: 1rem;
+	}
+	h1 span {
+		display: none;
+	}
+}
+</style>
+</head>
+<body>
+<header>
+	<h1>ENS Labels</h1>
+	<div id="github">
+		<a href="https://github.com/adraffy/ens-labels">@adraffy/ens-labels</a>
+	</div>
+</header>
+<div id="links">
+	<a href="https://adraffy.github.io/ens-normalize.js/test/resolver.html"><b>Resolver</b></a>
+	<a href="https://adraffy.github.io/ens-normalize.js/test/emoji.html">Emoji</a>
+	<a href="https://raffy.antistupid.com/eth/ens-emoji-freq.html">Emoji Frequency</a>
+	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Recent Registrations</a>
+	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
+	<a class="code" download href="./labels.json"><code>labels.json</code></a> 
+</div>
+<div id="examples">
+	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
+	<button data-hash="0x0000d9107d07a44f64888c5ecc821b7a8f7059c5c2ee18edfd1c040103f291a4">voicciov</button>
+	<button data-hash="0x0001640f2629bb323fca95bc13744478d5307ba0aca6e3a13f803691923ff00d">exrnnrxe</button>
+</div>
+<div id="input">
+	<input id="name_field" placeholder="Labelhash">
+</div>
+<progress class="hide"></progress>
+<main>
+</main>
+<img id="plot" src="./plot.png">
+<footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
+<script type="module">
+import {keccak} from '../keccak.js/dist/index.min.js';
+import {ens_tokenize, ens_beautify, dom_from_tokens, use_default_style} from '../ens-normalize.js/dist/all.min.js';
+use_default_style();
+
+const name_field = document.querySelector('#name_field');
+const prog = document.querySelector('progress');
+const main = document.querySelector('main');
+
+let label_map;
+let current_hash;
+
+for (let btn of document.querySelectorAll('#examples button')) {
+	btn.title = btn.dataset.hash;
+	btn.addEventListener('click', () => {
+		name_field.value = btn.dataset.hash;
+		update();
+	});
+}
+
+name_field.addEventListener('input', update);
+if (name_field.value) update();
+
+function update() {
+	current_hash = undefined;
+	search();
+}
+function search() {
+	if (!label_map) {
+		label_map = true;
+		download();
+	}
+	if (typeof current_hash === 'boolean') return; // do nothing
+	if (!current_hash) {
+		let hash = name_field.value.trim();
+		if (!hash) {
+			current_hash = false;
+			main.innerHTML = '';
+			return;
+		}	
+		if (/^(0x)?[0-9a-f]{64}$/i.test(hash)) {
+			current_hash = hash.slice(-64).toLowerCase();
+		} else if (/^\d+$/.test(hash)) {
+			current_hash = BigInt(hash).toString(16).slice(-64).padStart(64, '0');
+		} else {
+			current_hash = false;
+			main.innerHTML = '<div id="error">⚠️ Invalid hash</div>';
+			return;
+		}
+	} 
+	if (label_map === true) { // still downloading
+		main.innerHTML = '';
+		return;
+	}
+	let label = label_map.get(current_hash);
+	if (!label) {
+		if (prog.isConnected) {
+			main.innerHTML = `<div id="error">⚠️ Unknown hash (${(prog.value * 100).toFixed(0)}%)</div>`;
+		} else {
+			main.innerHTML = '<div id="error">⚠️ Unknown hash</div>';
+		}
+		return;
+	}
+	current_hash = true;
+	main.classList.remove('error');
+	main.innerHTML = '';
+	main.append(dom_from_tokens(ens_tokenize(label)));
+}
+
+function download() {
+	prog.classList.remove('hide');
+	let xhr = new XMLHttpRequest();
+	xhr.addEventListener('loadstart', e => {
+		prog.min = 0;
+		prog.max = 1;
+		prog.value = 0;
+	});
+	xhr.addEventListener('progress', e => {
+		prog.value = e.loaded / e.total;
+	});
+	xhr.addEventListener('load', () => {
+		label_map = new Map();
+		let labels = JSON.parse(xhr.responseText);
+		document.querySelector('h1').innerHTML += ` <span>(${labels.length.toLocaleString()})</span>`;
+		prog.value = 0;
+		process(labels, 0);
+	});
+	xhr.addEventListener('error', () => {
+		label_map = false;
+	});
+	xhr.open('GET', './labels.json');
+	xhr.send();
+}
+
+function process(labels, i) {
+	const N = 1000;
+	prog.value = i / labels.length;
+	for (let end = Math.min(labels.length, i + N); i < end; i++) {
+		let label = labels[i];
+		label_map.set(keccak().update(label).hex, label);
+	}
+	search();
+	if (i < labels.length) {
+		setTimeout(() => process(labels, i), 0);
+	} else {
+		prog.remove();
+	}
+}
+
+</script>
+</body>
+</html>
