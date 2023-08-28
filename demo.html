@@ -69,15 +69,36 @@ main:empty {
 }
 main {
 	display: flex;
+	flex-direction: column;
+	gap: 8px;
 	align-items: center;
 	justify-content: center;
+}
+main .tokens {
 	font-size: 36px;
+}
+#name {
+	font-size: 24px;
+	background-color: #fff;
+	padding: 4px 8px;
+	border: 1px solid #ccc;
+	overflow-y: auto;
+	line-break: anywhere;
+	max-height: 5rem;
+}
+.row {
+	display: flex;
+	gap: 8px;
+}
+main button {
+	text-decoration: none;
+	padding: 4px 8px;
 }
 #error {
 	background-color: #fcc;
 	padding: 8px 16px;
 	font-size: 16px;
-	border-radius: 16px;
+	border-radius: 4px;
 	font-size: 18px;
 }
 #plot {
@@ -184,6 +205,9 @@ function search() {
 	if (label_map === true) { // still downloading
 		main.innerHTML = '';
 		return;
+	} else if (label_map === false) {
+		main.innerHTML = '<div id="error">⚠️ Download failed</div>';
+		return;
 	}
 	let label = label_map.get(current_hash);
 	if (!label) {
@@ -191,13 +215,55 @@ function search() {
 			main.innerHTML = `<div id="error">⚠️ Unknown hash (${(prog.value * 100).toFixed(0)}%)</div>`;
 		} else {
 			main.innerHTML = '<div id="error">⚠️ Unknown hash</div>';
-		}
+			main.append(create_resolve_btn(`token:0x${current_hash}`, '↩️ Try Subgraph'));
+		}			
 		return;
 	}
 	current_hash = true;
 	main.classList.remove('error');
 	main.innerHTML = '';
 	main.append(dom_from_tokens(ens_tokenize(label)));
+
+	// let pretty_div = document.createElement('div');
+	// pretty_div.id = 'name';
+	// try {
+	// 	pretty_div.innerText = ens_beautify(label);
+	// } catch {
+	// 	pretty_div.innerText = label;
+	// }
+
+	let copy_btn = document.createElement('button');
+	copy_btn.innerHTML = 'Copy';
+	copy_btn.addEventListener('click', () => {
+		navigator.clipboard.writeText(label);
+	});
+
+	let row = document.createElement('div');
+	row.classList.add('row');
+	row.append(create_resolve_btn(`${label}.eth`, '↩️ Resolve'), copy_btn);
+	main.append(row);
+}
+
+function create_resolve_btn(label, html) {
+	let a = document.createElement('a');
+	a.href = `https://adraffy.github.io/ens-normalize.js/test/resolver.html#${encodeURIComponent(label)}`;
+	a.innerHTML = ``;
+	a.target = '_blank';
+	let btn = document.createElement('button');
+	btn.innerHTML = html;
+	a.append(btn);
+	return a;
+	/*
+	let btn = document.createElement('button');
+	btn.innerHTML = html;
+	btn.addEventListener('click', e => {
+		let a = document.createElement('a');
+		a.href = `https://adraffy.github.io/ens-normalize.js/test/resolver.html#${encodeURIComponent(label)}`;
+		a.target = '_blank';
+		a.click();
+	});
+	return btn;
+	*/
 }
 
 function download() {
