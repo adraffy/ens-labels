@@ -81,8 +81,10 @@ main {
 	font-size: 18px;
 }
 #plot {
+	display: block;
 	margin-top: 16px;
 	max-width: 640px;
+	width: 100%;
 }
 footer {
 	text-align: center;
@@ -102,7 +104,7 @@ footer {
 </head>
 <body>
 <header>
-	<h1>ENS Labels</h1>
+	<h1><a href="https://ens.domains">ENS</a> Labels</h1>
 	<div id="github">
 		<a href="https://github.com/adraffy/ens-labels">@adraffy/ens-labels</a>
 	</div>
@@ -119,14 +121,14 @@ footer {
 	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
 	<button data-hash="0x0000d9107d07a44f64888c5ecc821b7a8f7059c5c2ee18edfd1c040103f291a4">voicciov</button>
 	<button data-hash="0x0001640f2629bb323fca95bc13744478d5307ba0aca6e3a13f803691923ff00d">exrnnrxe</button>
-	<button data-hash="0xcb0cbc8493baf4a7b1972914ba0be89040e56e4a3c98d60268fe37b8c8e546d9">raffy</button>
+	<button data-hash="91842011529764390124322931916134555051359118325819011691525342013207339157209">raffy</button>
 </div>
 <div id="input">
-	<input id="name_field" placeholder="Labelhash">
+	<input id="name_field" placeholder="Labelhash: 0xHEX or DEC">
 </div>
 <progress class="hide"></progress>
 <main>
-	<img id="plot" src="./plot.png">
+	<a href="./plot.png"><img id="plot" src="./plot.png"></a>
 </main>
 <footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
 <script type="module">
@@ -171,9 +173,7 @@ function search() {
 			main.append(...readme_dom);
 			return;
 		}	
-		if (/^(0x)?[0-9a-f]{64}$/i.test(hash)) {
-			current_hash = hash.slice(-64).toLowerCase();
-		} else if (/^\d+$/.test(hash)) {
+		if (/^(0x[0-9a-f]+|\d+)$/i.test(hash)) {
 			current_hash = BigInt(hash).toString(16).slice(-64).padStart(64, '0');
 		} else {
 			current_hash = false;
@@ -226,7 +226,7 @@ function download() {
 }
 
 function process(labels, i) {
-	const N = 1000;
+	const N = 4096;
 	prog.value = i / labels.length;
 	for (let end = Math.min(labels.length, i + N); i < end; i++) {
 		let label = labels[i];
