@@ -94,24 +94,37 @@ main button {
 	text-decoration: none;
 	padding: 4px 8px;
 }
-#error {
-	background-color: #fcc;
+#status {
+	background-color: #cfc;
 	padding: 8px 16px;
 	font-size: 16px;
 	border-radius: 4px;
 	font-size: 18px;
 }
+#status.error {
+	background-color: #fcc;
+}
 #plot {
 	display: block;
-	margin-top: 16px;
 	max-width: 640px;
 	width: 100%;
+}
+#readme {
+	background-color: #ffc;
+	padding: 16px;
+	padding-left: 36px;
+	margin: 16px 0;
+	font-size: 18px;
+	line-height: 1.5;
+}
+#readme code {
+	background-color: #cff;
+	padding: 1px;
 }
 footer {
 	text-align: center;
 	color: #666;
-	margin-top: 1rem;
-	margin-bottom: 0.5rem;
+	margin: 16px 8px 8px;
 }
 @media only screen and (max-width: 800px) { 
 	body {
@@ -149,7 +162,13 @@ footer {
 </div>
 <progress class="hide"></progress>
 <main>
-	<a href="./plot.png"><img id="plot" src="./plot.png"></a>
+	<ul id="readme">
+		<li>Click an <button data-hash="0xf1b63dc799135ed42428eefabf817f11eb3b13a85389643c0c4925e3d2050f71">Example</button> to see how it works.</li>
+		<li><b>Labelhash</b> is <a target="_blank" href="../keccak.js/test/demo.html">256-bit Keccak</a> of the label encoded as UTF-8.</li>
+		<li>The <b>Token ID</b> of an .eth ENS NFT is a <b>Labelhash</b>.</li>
+		<li><code>f(label) = hash</code> &rarr; <code>f<sup>-1</sup>(hash) = label</code></li>
+	</ul>	
+	<a href="./plot.png" target="_blank"><img id="plot" src="./plot.png"></a>
 </main>
 <footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
 <script type="module">
@@ -165,7 +184,7 @@ const readme_dom = [...main.childNodes]
 let label_map;
 let current_hash;
 
-for (let btn of document.querySelectorAll('#examples button')) {
+for (let btn of document.querySelectorAll('[data-hash]')) {
 	btn.title = btn.dataset.hash;
 	btn.addEventListener('click', () => {
 		name_field.value = btn.dataset.hash;
@@ -186,6 +205,10 @@ function search() {
 		download();
 	}
 	if (typeof current_hash === 'boolean') return; // do nothing
+	if (label_map === true) { 
+		main.innerHTML = `<div id="status">⏳️ Downloading (${(prog.value * 100).toFixed(0)}%)</div>`;
+		return;
+	}
 	if (!current_hash) {
 		let hash = name_field.value.trim();
 		if (!hash) {
@@ -198,23 +221,20 @@ function search() {
 			current_hash = BigInt(hash).toString(16).slice(-64).padStart(64, '0');
 		} else {
 			current_hash = false;
-			main.innerHTML = '<div id="error">⚠️ Invalid hash</div>';
+			main.innerHTML = '<div id="status" class="error">⚠️ Invalid hash</div>';
 			return;
 		}
 	} 
-	if (label_map === true) { // still downloading
-		main.innerHTML = '';
-		return;
-	} else if (label_map === false) {
-		main.innerHTML = '<div id="error">⚠️ Download failed</div>';
+	if (label_map === false) {
+		main.innerHTML = '<div id="status" class="error">⚠️ Download failed</div>';
 		return;
 	}
 	let label = label_map.get(current_hash);
 	if (!label) {
 		if (prog.isConnected) {
-			main.innerHTML = `<div id="error">⚠️ Unknown hash (${(prog.value * 100).toFixed(0)}%)</div>`;
+			main.innerHTML = `<div id="status" class="error">❓️ Unknown hash (${(prog.value * 100).toFixed(0)}%)</div>`;
 		} else {
-			main.innerHTML = '<div id="error">⚠️ Unknown hash</div>';
+			main.innerHTML = '<div id="status" class="error">❓️ Unknown hash</div>';
 			main.append(create_resolve_btn(`token:0x${current_hash}`, '↩️ Try Subgraph'));
 		}			
 		return;
@@ -276,6 +296,7 @@ function download() {
 	});
 	xhr.addEventListener('progress', e => {
 		prog.value = e.loaded / e.total;
+		search();
 	});
 	xhr.addEventListener('load', () => {
 		label_map = new Map();
