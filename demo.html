@@ -115,11 +115,15 @@ main button {
 	padding-left: 36px;
 	margin: 16px 0;
 	font-size: 18px;
-	line-height: 1.5;
+	line-height: 1.7;
+	align-self: stretch;
 }
 #readme code {
 	background-color: #cff;
 	padding: 1px;
+}
+#readme .inverse {
+	background-color: #afa;
 }
 footer {
 	text-align: center;
@@ -144,8 +148,8 @@ footer {
 	</div>
 </header>
 <div id="links">
-	<a href="https://adraffy.github.io/ens-normalize.js/test/resolver.html"><b>Resolver</b></a>
-	<a href="https://adraffy.github.io/ens-normalize.js/test/emoji.html">Emoji</a>
+	<a href="../ens-normalize.js/test/resolver.html"><b>Resolver</b></a>
+	<a href="../ens-normalize.js/test/emoji.html">Emoji</a>
 	<a href="https://raffy.antistupid.com/eth/ens-emoji-freq.html">Emoji Frequency</a>
 	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Recent Registrations</a>
 	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
@@ -155,7 +159,7 @@ footer {
 	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
 	<button data-hash="0x0000d9107d07a44f64888c5ecc821b7a8f7059c5c2ee18edfd1c040103f291a4">voicciov</button>
 	<button data-hash="0x0001640f2629bb323fca95bc13744478d5307ba0aca6e3a13f803691923ff00d">exrnnrxe</button>
-	<button data-hash="91842011529764390124322931916134555051359118325819011691525342013207339157209">raffy</button>
+	<button data-hash="79233663829379634837589865448569342784712482819484549289560981379859480642508">vitalik</button>
 </div>
 <div id="input">
 	<input id="name_field" placeholder="Labelhash: 0xHEX or DEC">
@@ -165,8 +169,8 @@ footer {
 	<ul id="readme">
 		<li>Click an <button data-hash="0xf1b63dc799135ed42428eefabf817f11eb3b13a85389643c0c4925e3d2050f71">Example</button> to see how it works.</li>
 		<li><b>Labelhash</b> is <a target="_blank" href="../keccak.js/test/demo.html">256-bit Keccak</a> of the label encoded as UTF-8.</li>
-		<li>The <b>Token ID</b> of an .eth ENS NFT is a <b>Labelhash</b>.</li>
-		<li><code>f(label) = hash</code> &rarr; <code>f<sup>-1</sup>(hash) = label</code></li>
+		<li>The <b>Token ID</b> of an <a target="_blank" href="https://opensea.io/assets/ethereum/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/79233663829379634837589865448569342784712482819484549289560981379859480642508">.eth ENS ERC-721 NFT</a> is a <b>Labelhash</b>.</li>
+		<li><code>f(label) = hash</code> &rarr; <code class="inverse">f<sup>-1</sup>(hash) = label</code></li>
 	</ul>	
 	<a href="./plot.png" target="_blank"><img id="plot" src="./plot.png"></a>
 </main>
@@ -266,7 +270,7 @@ function search() {
 
 function create_resolve_btn(label, html) {
 	let a = document.createElement('a');
-	a.href = `https://adraffy.github.io/ens-normalize.js/test/resolver.html#${encodeURIComponent(label)}`;
+	a.href = `../ens-normalize.js/test/resolver.html#${encodeURIComponent(label)}`;
 	a.innerHTML = ``;
 	a.target = '_blank';
 	let btn = document.createElement('button');
