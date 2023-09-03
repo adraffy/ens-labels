@@ -5,6 +5,8 @@
  * [`38.6MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`78bbfbde610101fb02d67c2bb5a766755578d50912e5ff789d63fb9de90edac5` (SHA256)
 <!-- /summary -->
 
+[**Demo**](https://adraffy.github.io/ens-labels/demo.html) ⭐
+
 ![Plot](plot.png)
 
 ```Javascript

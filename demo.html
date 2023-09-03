@@ -23,7 +23,7 @@ header h1 {
 	flex: 1;
 	margin: 0;
 }
-h1 span {
+h1 .count {
 	font-size: 60%;
 	font-weight: bold;
 }
@@ -136,9 +136,6 @@ footer {
 @media only screen and (max-width: 800px) { 
 	body {
 		margin: 1rem;
-	}
-	h1 span {
-		display: none;
 	}
 }
 </style>
@@ -308,7 +305,7 @@ function download() {
 	xhr.addEventListener('load', () => {
 		label_map = new Map();
 		let labels = JSON.parse(xhr.responseText);
-		document.querySelector('h1').innerHTML += ` <span>(${labels.length.toLocaleString()})</span>`;
+		document.querySelector('h1').innerHTML += ` <span class="count">(${labels.length.toLocaleString()})</span>`;
 		prog.value = 0;
 		process(labels, 0);
 	});
