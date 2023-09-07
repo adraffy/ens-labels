@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ENS Label⁻¹</title>
+<title>ENS Labelhash⁻¹</title>
 <style>
 .hide {
 	display: none !important;
@@ -158,7 +158,7 @@ footer {
 </head>
 <body>
 <header>
-	<h1><a href="https://ens.domains">ENS</a> Label⁻¹<span class="count" title="Number of known (hash, label)-pairs"></span></h1>
+	<h1><a href="https://ens.domains">ENS</a> Labelhash⁻¹<span class="count" title="Number of known (hash, label)-pairs"></span></h1>
 	<div id="github">
 		<a href="https://github.com/adraffy/ens-labels">adraffy/ens-labels</a>
 	</div>
@@ -378,7 +378,7 @@ function create_resolve_btn(label, html) {
 }
 
 function progress_gradient(p, bar, bg = '#ccc') {
-	return `linear-gradient(to right, ${bar} ${p}%, ${bg}8 ${p+0.1}%)`;
+	return `linear-gradient(to right, ${bar} ${p}%, ${bg} ${p+0.1}%)`;
 }
 
 </script>
