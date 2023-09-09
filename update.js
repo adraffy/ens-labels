@@ -24,11 +24,11 @@ for (let label of LABELS) {
 let count = new Intl.NumberFormat('en-US').format(LABELS.length);
 let date = new Date().toJSON().split('T')[0];
 
-let size_mb = statSync(labels_file).size / (1<<20);
+let size = (statSync(labels_file).size / (1<<20)).toFixed(1) + 'MB';
 let hash = createHash('sha256').update(readFileSync(labels_file)).digest('hex');
 
 let summary = `\`${count}\` unique, stop-free labels as of \`${date}\` collected from ENS contract events and primary name records. 
- * [\`${size_mb.toFixed(1)}MB\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${hash}\` (SHA256)`;
+ * [\`${size}\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${hash}\` (SHA256)`;
 
 function create_length_tally(max) {
 	let v = [];
@@ -76,23 +76,31 @@ function make_longest_table(labels) {
 	return lines.join('\n');
 }
 
-console.log({count, date, size_mb});
+console.log({count, date, size});
 
 if (mode === 'save') {
-	let file = new URL('./README.md', import.meta.url);
-	let text = readFileSync(file, {encoding: 'utf-8'});
+	let files = [
+		new URL('./README.md', import.meta.url),
+		new URL('./demo.html', import.meta.url)
+	];
 	let vars = {
 		summary, 
 		table: make_length_table(), 
 		longest: make_longest_table(),
+		size, 
 	};
-	text = text.replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gmsu, (_, k) => {
-		let value = vars[k];
-		if (!value) throw new Error(`expected var: "${k}"`);
-		return `<!-- ${k} -->\n${value}\n<!-- /${k} -->`;
-	});
-	writeFileSync(file, text);
-	console.log(`Updated: ${file}`);
+	for (let file of files) {
+		let text = readFileSync(file, {encoding: 'utf-8'});
+		
+		text = text.replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gmsu, (all, k) => {
+			let value = vars[k];
+			if (!value) throw new Error(`expected var: "${k}"`);
+			if (all.includes('\n')) value = `\n${value}\n`;
+			return `<!-- ${k} -->${value}<!-- /${k} -->`;
+		});
+		writeFileSync(file, text);
+		console.log(`Updated: ${file}`);
+	}
 } else if (mode === 'md:table') {
 	console.log(make_length_table(parseInt(args[0])));
 } else if (mode === 'md:longest') {

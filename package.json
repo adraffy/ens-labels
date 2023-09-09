@@ -6,9 +6,9 @@
 	],
 	"type": "module",
 	"scripts": {
-		"table": "node dump-count.js save",
+		"text": "node update.js save",
 		"plot": "wolframscript CreatePlot.wls",
-		"update": "npm run table && npm run plot"
+		"update": "npm run text && npm run plot"
 	},
 	"devDependencies": {
 		"@adraffy/keccak": "^1.3.0"
