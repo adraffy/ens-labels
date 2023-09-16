@@ -169,7 +169,7 @@ footer {
 	<a href="../keccak.js/test/demo.html">Keccak Hasher</a>
 	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Recent Registrations</a>
 	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
-	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->38.7MB<!-- /size -->)</span></a> 
+	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->38.8MB<!-- /size -->)</span></a> 
 </div>
 <div id="examples">
 	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
@@ -190,7 +190,7 @@ footer {
 		<li>Click an <button data-hash="0xf1b63dc799135ed42428eefabf817f11eb3b13a85389643c0c4925e3d2050f71">Example</button> to see how it works.</li>
 		<li><b>Labelhash</b> is <a target="_blank" href="../keccak.js/test/demo.html">256-bit Keccak</a> of the label encoded as UTF-8.</li>
 		<li>The <b>Token ID</b> of an <a target="_blank" href="https://opensea.io/assets/ethereum/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/79233663829379634837589865448569342784712482819484549289560981379859480642508">.eth ENS ERC-721 NFT</a> is a <b>Labelhash</b>.</li>
-		<li><code>f(label) = hash</code> &rarr; <code class="inverse">f<sup>-1</sup>(hash) = label</code></li>
+		<li><code>f(label) = hash</code> &rarr; <code class="inverse">label ∈ f<sup>-1</sup>(hash)</code></li>
 	</ul>
 	<a href="./plot.png" target="_blank"><img id="plot" src="./plot.png"></a>
 </main>
@@ -227,7 +227,7 @@ for (let btn of document.querySelectorAll('[data-hash]')) {
 name_field.addEventListener('input', update_hash);
 more_ta.addEventListener('input', () => {
 	if (more_timer) return;
-	more_timer = setTimeout(update_more, 500);
+	more_timer = setTimeout(update_more, 100);
 });
 
 update_hash();
@@ -240,7 +240,7 @@ function update_more() {
 	for (let line of more_ta.value.split('\n')) {
 		line = line.trim();
 		if (line) {
-			label_map.set(keccak().update(line).hex, line);
+			add_label(line);
 			dirty = true;
 		}
 	}
@@ -265,7 +265,8 @@ function update_hash() {
 		let btn = document.createElement('button');
 		btn.innerHTML = '🆔️ Convert to Hash';
 		btn.addEventListener('click', () => {
-			name_field.value = `0x${keccak().update(name_field.value.trim()).hex}`;
+			name_field.value = `0x${add_label(name_field.value.trim())}`;
+			update_count();
 			update_hash();
 		});
 		search_status.append(btn);
@@ -354,8 +355,7 @@ function compute_hashes(labels, i) {
 	init_status.style.background = progress_gradient(p, '#0e0 ', '#8f8'); 
 	init_status.innerHTML = `👨‍💻 Hashing (${p.toFixed(0)}%)`;
 	for (let end = Math.min(labels.length, i + N); i < end; i++) {
-		let label = labels[i];
-		label_map.set(keccak().update(label).hex, label);
+		add_label(labels[i]);
 	}
 	update_count();
 	update_search();
@@ -364,6 +364,11 @@ function compute_hashes(labels, i) {
 	} else {
 		init_status.remove();
 	}
+}
+function add_label(label) {
+	let hash = keccak().update(label).hex;
+	label_map.set(hash, label);
+	return hash;
 }
 
 function create_resolve_btn(label, html) {
