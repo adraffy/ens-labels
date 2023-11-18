@@ -8,9 +8,6 @@
 .hide {
 	display: none !important;
 }
-.balloon {
-	flex: 1;
-}
 button {
 	cursor: pointer;
 	text-decoration: none;
@@ -57,8 +54,11 @@ h1 .count {
 	font: 70% sans-serif;
 	color: #666;
 }
+#download {
+	user-select: none;
+}
 #input {
-	margin: 16px 0;
+	margin: 8px 0;
 }
 #name_field {
 	box-sizing: border-box;
@@ -71,8 +71,15 @@ h1 .count {
 	margin-top: 16px;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 6px;
+	gap: 8px;
 	font-size: 14px;
+}
+#actions {
+	display: flex;
+	gap: 8px;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 2px solid #fff;
 }
 main:empty {
 	display: none;
@@ -100,6 +107,10 @@ main .tokens {
 .row {
 	display: flex;
 	gap: 8px;
+}
+main p {
+	text-align: center;
+	margin: 0;
 }
 .status:empty {
 	display: none;
@@ -168,8 +179,10 @@ footer {
 	<a href="../ens-normalize.js/test/emoji.html">Emoji</a>
 	<a href="../keccak.js/test/demo.html">Keccak Hasher</a>
 	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Recent Registrations</a>
-	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
 	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->39.7MB<!-- /size -->)</span></a> 
+	•
+	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
+	<a href="https://github.com/Zimtente/ens-collections/tree/main/collections">Vision Categories</a>
 </div>
 <div id="examples">
 	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
@@ -179,6 +192,11 @@ footer {
 	<button data-hash="0x0029271c6712c743df20315ce930b37bd5aabcadb870ddf2b7925151c75c57e2">etherscanio</button>
 	<button data-hash="0x01626f5a5c7a2123527dce0a49a04d319c7961b20c7727286d8fd15f43f5508f">muchfunwowdoge</button>
 	<button data-hash="79233663829379634837589865448569342784712482819484549289560981379859480642508">vitalik</button>
+</div>
+<div id="actions">
+	<button id="hash_btn">Convert to Hash</button>
+	<span style="flex: 1"></span>
+	<button id="hexdec_btn">HEX↔DEC</button>
 </div>
 <div id="input">
 	<input id="name_field" placeholder="Labelhash: 0xHEX or DEC">
@@ -230,6 +248,19 @@ more_ta.addEventListener('input', () => {
 	if (more_timer) return;
 	more_timer = setTimeout(update_more, 100);
 });
+document.querySelector('#hash_btn').addEventListener('click', () => {
+	name_field.value = `0x${add_label(name_field.value.trim())}`;
+	update_count();
+	update_hash();
+});
+document.querySelector('#hexdec_btn').addEventListener('click', () => {
+	let s = name_field.value.trim();
+	if (/^0x[0-9a-f]+$/i.test(s)) {
+		name_field.value = BigInt(s).toString();
+	} else if (/^\d+$/.test(s)) {
+		name_field.value = '0x' + BigInt(s).toString(16).slice(-64).padStart(64, '0');
+	}
+});
 
 update_hash();
 update_more();
@@ -259,18 +290,10 @@ function update_hash() {
 		search_status.innerHTML = '';
 		return;
 	}
-	if (!/^(0x[0-9a-f]+|\d+)$/i.test(hash)) {
+	if (!/^(0x[0-9a-f]{64}|\d+)$/i.test(hash)) {
 		current_hash = current_label = null
 		main.innerHTML = '';
 		search_status.innerHTML = '⚠️ Invalid hash format';
-		let btn = document.createElement('button');
-		btn.innerHTML = '🆔️ Convert to Hash';
-		btn.addEventListener('click', () => {
-			name_field.value = `0x${add_label(name_field.value.trim())}`;
-			update_count();
-			update_hash();
-		});
-		search_status.append(btn);
 		return;
 	}
 	current_hash = BigInt(hash).toString(16).slice(-64).padStart(64, '0');
@@ -294,8 +317,8 @@ function search() {
 	if (!label) {
 		download();
 		search_status.innerHTML = `❓️ Unknown hash`;
-		if (init_status.isConnected) search_status.append(' (still hashing)');
-		search_status.append(create_resolve_btn(`token:0x${current_hash}`, '↩️ Try Subgraph'));
+		if (init_status.isConnected) search_status.innerHTML += '—<i>still hashing</i>';
+		search_status.append(create_resolve_btn(`token:0x${current_hash}`, '↩️ Check Subgraph'));
 		return;
 	}
 	search_status.innerHTML = '';
@@ -306,6 +329,16 @@ function search() {
 	copy_btn.addEventListener('click', () => {
 		navigator.clipboard.writeText(label);
 	});
+
+	//let hash_hex = '0x' + current_hash;
+	
+	// let row_hex = document.createElement('p');
+	// row_hex.innerHTML = `<b>Labelhash</b>: <code>${hash_hex}</code>`;
+	// main.append(row_hex);
+
+	// let row_dec = document.createElement('p');
+	// row_dec.innerHTML = `<b>Token:</b> <code>${BigInt(hash_hex).toString()}</code>`;
+	// main.append(row_dec);
 
 	let row = document.createElement('div');
 	row.classList.add('row');
@@ -358,13 +391,14 @@ function compute_hashes(labels, i) {
 	for (let end = Math.min(labels.length, i + N); i < end; i++) {
 		add_label(labels[i]);
 	}
-	update_count();
-	update_search();
 	if (i < labels.length) {
 		setTimeout(() => compute_hashes(labels, i), 0);
 	} else {
+		current_label = false; // force update
 		init_status.remove();
 	}
+	update_count();
+	update_search();
 }
 function add_label(label) {
 	let hash = keccak().update(label).hex;
