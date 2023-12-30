@@ -329,13 +329,11 @@ function search() {
 		return;
 	}
 	search_status.innerHTML = '';
-	main.append(dom_from_tokens(ens_tokenize(label)));
-
-	let copy_btn = document.createElement('button');
-	copy_btn.innerHTML = 'Copy';
-	copy_btn.addEventListener('click', () => {
-		navigator.clipboard.writeText(label);
-	});
+	if (label) {
+		main.append(dom_from_tokens(ens_tokenize(label)));
+	} else {
+		main.innerHTML = `<div class="tokens"><span class="ignored"><i>Empty String</i></span></div>`;
+	}
 
 	//let hash_hex = '0x' + current_hash;
 	
@@ -349,7 +347,14 @@ function search() {
 
 	let row = document.createElement('div');
 	row.classList.add('row');
-	row.append(create_resolve_btn(`${label}.eth`, '↩️ Resolve'), copy_btn);
+	row.append(create_resolve_btn(`${label}.eth`, '↩️ Resolve'));
+	if (label) {
+		let copy_btn = document.createElement('button');
+		copy_btn.innerHTML = 'Copy';
+		copy_btn.addEventListener('click', () => {
+			navigator.clipboard.writeText(label);
+		});
+	}
 	main.append(row);
 }
 
