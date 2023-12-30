@@ -11,6 +11,7 @@
 button {
 	cursor: pointer;
 	text-decoration: none;
+	font-size: 100%;
 	padding: 4px 8px;
 }
 body {
@@ -71,8 +72,11 @@ h1 .count {
 	margin-top: 16px;
 	display: flex;
 	flex-wrap: wrap;
-	gap: 8px;
-	font-size: 14px;
+	gap: 4px;
+}
+#examples button {
+	font-size: 80%;
+	padding: 2px 4px;
 }
 #actions {
 	display: flex;
@@ -140,6 +144,9 @@ main p {
 	line-height: 1.7;
 	align-self: stretch;
 }
+#readme button {
+	font-size: 80%;
+}
 #readme code {
 	background-color: #cff;
 	padding: 1px;
@@ -178,8 +185,10 @@ footer {
 	<a href="../ens-normalize.js/test/resolver.html"><b>Resolver</b></a>
 	<a href="../ens-normalize.js/test/emoji.html">Emoji</a>
 	<a href="../keccak.js/test/demo.html">Keccak Hasher</a>
-	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Recent Registrations</a>
-	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->39.9MB<!-- /size -->)</span></a> 
+	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Registrations</a>
+	<a href="https://raffy.antistupid.com/eth/ens-renews.html">Renews</a>
+	<a href="https://raffy.antistupid.com/eth/ens-exp.html">Expirations</a>
+	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->40.0MB<!-- /size -->)</span></a> 
 	•
 	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
 </div>
@@ -193,7 +202,7 @@ footer {
 	<button data-hash="79233663829379634837589865448569342784712482819484549289560981379859480642508">vitalik</button>
 </div>
 <div id="actions">
-	<button id="hash_btn">Convert to Hash</button>
+	<button id="hash_btn">Convert Input to Hash</button>
 	<span style="flex: 1"></span>
 	<button id="hexdec_btn">HEX↔DEC</button>
 </div>
@@ -212,7 +221,7 @@ footer {
 	</ul>
 	<a href="./plot.png" target="_blank"><img id="plot" src="./plot.png"></a>
 </main>
-<textarea placeholder="Additional Labels (1 per line)" rows="10"></textarea>
+<textarea placeholder="Additional Labels (separated by whitespace)" rows="10"></textarea>
 <footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
 <script type="module">
 import {keccak} from '../keccak.js/dist/index.min.js';
@@ -268,8 +277,7 @@ function update_more() {
 	clearTimeout(more_timer);
 	more_timer = null;
 	let dirty;
-	for (let line of more_ta.value.split('\n')) {
-		line = line.trim();
+	for (let line of more_ta.value.split(/\s+/)) {
 		if (line) {
 			add_label(line);
 			dirty = true;
@@ -313,7 +321,7 @@ function search() {
 	if (label === current_label) return;
 	main.innerHTML = '';
 	current_label = label;
-	if (!label) {
+	if (typeof label !== 'string') {
 		download();
 		search_status.innerHTML = `❓️ Unknown hash`;
 		if (init_status.isConnected) search_status.innerHTML += '—<i>still hashing</i>';
