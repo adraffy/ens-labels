@@ -1,8 +1,9 @@
 # ens-labels
 
 <!-- summary -->
-`2,829,475` unique, stop-free labels as of `2024-03-04` collected from ENS contract events and primary name records. 
-	 * [`40.9MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`9308d78352778d2916e7bd2d85b7a6793ea588d50d0b60937c6b51ab9e84a4b7` (SHA256)
+`2,829,475` unique, stop-free labels as of `2024-03-04` collected from ENS contract events and primary name records.
+
+* [`40.9MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`9308d78352778d2916e7bd2d85b7a6793ea588d50d0b60937c6b51ab9e84a4b7` (SHA256)
 <!-- /summary -->
 
 [**Demo**](https://adraffy.github.io/ens-labels/demo.html) ⭐

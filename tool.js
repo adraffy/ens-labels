@@ -85,7 +85,7 @@ if (mode === 'sync') {
 		writeFileSync(file, JSON.stringify([...set], null, '\t'));
 	}
 
-} else if (mode === 'save') {
+} else if (mode === 'text') {
 
 	let length_map = new LengthMap(labels);
 	let count = new Intl.NumberFormat('en-US').format(labels.length);
@@ -94,8 +94,11 @@ if (mode === 'sync') {
 	let size = (statSync(file).size / (1<<20)).toFixed(1) + 'MB';
 	let hash = createHash('sha256').update(data).digest('hex');
 	
-	let summary = `\`${count}\` unique, stop-free labels as of \`${date}\` collected from ENS contract events and primary name records. 
-	 * [\`${size}\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${hash}\` (SHA256)`;
+	let summary = `
+\`${count}\` unique, stop-free labels as of \`${date}\` collected from ENS contract events and primary name records.
+
+* [\`${size}\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${hash}\` (SHA256)
+`.trim();
 	
 	let files = [
 		new URL('./README.md', import.meta.url),

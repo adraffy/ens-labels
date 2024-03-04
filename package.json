@@ -7,7 +7,7 @@
 	"type": "module",
 	"scripts": {
 		"sync": "node tool.js sync",
-		"text": "node tool.js save",
+		"text": "node tool.js text",
 		"plot": "wolframscript CreatePlot.wls",
 		"update": "npm run sync && npm run text && npm run plot"
 	},
