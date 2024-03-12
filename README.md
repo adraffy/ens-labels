@@ -8,7 +8,7 @@
 
 [**Demo**](https://adraffy.github.io/ens-labels/demo.html) ⭐
 
-![Plot](plot.png)
+![Plot](plot.svg)
 
 ## Length Distribution
 
