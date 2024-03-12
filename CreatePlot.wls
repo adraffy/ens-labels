@@ -25,7 +25,4 @@ g = BarChart[Labeled[#2, Column[{
   GridLines -> Automatic, 
   AxesLabel -> (Style[padded[#], 24, Bold, color, 
        Background -> bg] & /@ {"Length", "Labels"})]
-Export["plot.png", 
- Rasterize[g, ImageSize -> raster, Background -> None],
- IncludeMetaInformation->False
-]
+Export["plot.svg", g, IncludeMetaInformation->False]
