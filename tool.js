@@ -71,13 +71,17 @@ class LengthMap extends Map {
 }
 
 if (mode === 'sync') {
+	//let set = new Set(labels.filter(x => !x.includes('.')));
 	let set = new Set(labels);
 	let {size} = set;
 	console.log(`Before: ${size}`);
 	for (let label of await fetch('https://alpha.antistupid.com/ens-regs/all.json').then(r => r.json())) {
-		if (!set.has(label)) {
-			set.add(label);
-		}	
+		// 20240910: this was using registered labels which might contain a stop
+		for (let part of label.split('.')) { 
+			if (!set.has(part)) {
+				set.add(part);
+			}
+		}
 	}
 	let added = set.size - size;
 	console.log(` After: ${set.size} (+${added})`);
