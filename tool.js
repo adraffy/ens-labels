@@ -73,8 +73,7 @@ class LengthMap extends Map {
 if (mode === 'sync') {
 	//let set = new Set(labels.filter(x => !x.includes('.')));
 	let set = new Set(labels);
-	let {size} = set;
-	console.log(`Before: ${size}`);
+	console.log(`Before: ${labels.length}`);
 	for (let label of await fetch('https://alpha.antistupid.com/ens-regs/all.json').then(r => r.json())) {
 		// 20240910: this was using registered labels which might contain a stop
 		for (let part of label.split('.')) { 
@@ -83,10 +82,12 @@ if (mode === 'sync') {
 			}
 		}
 	}
-	let added = set.size - size;
-	console.log(` After: ${set.size} (+${added})`);
+	// 20240915: why wasn't i sorting this?!
+	set = [...set].map(explode_cp).sort((a, b) => compare_arrays(a, b)).map(x => String.fromCodePoint(...x));
+	let added = set.length - labels.length;
+	console.log(` After: ${set.length} (+${added})`);
 	if (added) {
-		writeFileSync(file, JSON.stringify([...set], null, '\t'));
+		writeFileSync(file, JSON.stringify(set, null, '\t'));
 	}
 
 } else if (mode === 'text') {
@@ -139,4 +140,16 @@ if (mode === 'sync') {
 
 } else {
 	throw new Error(`unknown mode: ${mode}`);
+}
+
+
+function explode_cp(s) {
+	return Array.from(s, c => c.codePointAt(0));
+}
+
+function compare_arrays(a, b) {
+	let n = a.length;
+	let c = n - b.length;
+	for (let i = 0; c == 0 && i < n; i++) c = a[i] - b[i];
+	return c;
 }
