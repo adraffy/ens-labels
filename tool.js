@@ -83,7 +83,7 @@ if (mode === 'sync') {
 		}
 	}
 	// 20240915: why wasn't i sorting this?!
-	set = [...set].map(explode_cp).sort((a, b) => compare_arrays(a, b)).map(x => String.fromCodePoint(...x));
+	set = [...set].map(explode_cp).sort(compare_arrays).map(x => String.fromCodePoint(...x));
 	let added = set.length - labels.length;
 	console.log(` After: ${set.length} (+${added})`);
 	if (added) {
