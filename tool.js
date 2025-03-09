@@ -110,10 +110,10 @@ if (mode === 'sync') {
 		new URL('./demo.html', import.meta.url)
 	];
 	let vars = {
-		summary, 
-		table: length_map.make_length_table(), 
+		summary,
+		table: length_map.make_length_table(),
 		longest: length_map.make_longest_table(),
-		size, 
+		size,
 	};
 	for (let file of files) {
 		let text = readFileSync(file, {encoding: 'utf-8'});
@@ -138,10 +138,24 @@ if (mode === 'sync') {
 } else if (mode === 'longest') {
 	console.log(new LengthMap(labels).find_longest(parseInt(args[0]) || 50).map(s => [...s].length));
 
+} else if (mode === 'nc') { // namechain collision
+	const bits = BigInt(args.shift() ?? 32);
+	const map = new Map();
+	let found = 0;
+	for (const label of labels) {
+		const key = BigInt('0x' + keccak().update(label).hex) >> bits;
+		const old = map.get(key);
+		if (old !== undefined) {
+			console.log(`[${++found}] "${old}" vs "${label}"`);
+			throw 1;
+		} else {
+			map.set(key, label);
+		}
+	}
+
 } else {
 	throw new Error(`unknown mode: ${mode}`);
 }
-
 
 function explode_cp(s) {
 	return Array.from(s, c => c.codePointAt(0));
