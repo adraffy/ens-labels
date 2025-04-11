@@ -77,9 +77,7 @@ if (mode === 'sync') {
 	for (let label of await fetch('https://alpha.antistupid.com/ens-regs/all.json').then(r => r.json())) {
 		// 20240910: this was using registered labels which might contain a stop
 		for (let part of label.split('.')) { 
-			if (!set.has(part)) {
-				set.add(part);
-			}
+			set.add(part);
 		}
 	}
 	// 20240915: why wasn't i sorting this?!
