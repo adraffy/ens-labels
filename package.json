@@ -8,7 +8,7 @@
 	"scripts": {
 		"sync": "node tool.js sync",
 		"text": "node tool.js text",
-		"plot": "wolframscript CreatePlot.wls",
+		"plot": "wolframscript -activate && wolframscript CreatePlot.wls",
 		"update": "npm run sync && npm run text && npm run plot"
 	},
 	"devDependencies": {
