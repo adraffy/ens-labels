@@ -22,7 +22,9 @@ g = BarChart[Labeled[#2, Column[{
      Range[step, Max[m[[All, 2]]], step]},
   BarSpacing -> None,
   ImageSize -> raster,
-  GridLines -> Automatic, 
+  GridLines -> Automatic,
   AxesLabel -> (Style[padded[#], 24, Bold, color, 
-       Background -> bg] & /@ {"Length", "Labels"})]
-Export["plot.svg", g, IncludeMetaInformation->False]
+       Background -> bg] & /@ {"Length", "Labels"})];
+code = ExportString[g, "SVG", IncludeMetaInformation->False]
+code = StringReplace[code, "fill-opacity:1;" -> "fill-opacity:0;", 1];
+Export["plot.svg", code, "Text"];
