@@ -14,8 +14,8 @@ class LengthMap extends Map {
 		this.add(labels);
 	}
 	add(labels) {
-		for (let label of labels) {
-			let len = [...label].length;
+		for (const label of labels) {
+			const len = [...label].length;
 			let bucket = this.get(len);
 			if (!bucket) {
 				bucket = [];
@@ -25,7 +25,7 @@ class LengthMap extends Map {
 		}
 	}
 	create_length_tally(max) {
-		let v = [];
+		const v = [];
 		for (let n = 0; n < max; n++) {
 			v.push(this.get(n)?.length|0);
 		}
@@ -36,19 +36,19 @@ class LengthMap extends Map {
 		if (!Array.isArray(tally)) {
 			tally = this.create_length_tally(tally || 30);
 		}
-		let lines = [
+		const lines = [
 			`| N | # | % |`,
 			`| ---: | ---: | ---: |`
 		];
-		let total = tally.reduce((a, x) => a + x, 0);
+		const total = tally.reduce((a, x) => a + x, 0);
 		lines.push(...tally.map((n, i) => {
 			return `| ${i}${i===tally.length-1?'+':''} | ${n} | ${(100*n/total).toFixed(perc)}% |`;
 		}));
 		return lines.join('\n');
 	}
 	find_longest(ge) {
-		let sorted = [...this.keys()].sort((a, b) => a-b);
-		let found = [];
+		const sorted = [...this.keys()].sort((a, b) => a-b);
+		const found = [];
 		while (found.length < ge) {
 			found.push(...this.get(sorted.pop()));
 		}
@@ -58,12 +58,12 @@ class LengthMap extends Map {
 		if (!Array.isArray(labels)) {
 			labels = this.find_longest(labels || 20);
 		}
-		let lines = [
+		const lines = [
 			`| N | Bytes | Labelhash |`,
 			`| ---: | ---: | :--- |`
 		];
-		for (let s of labels) {
-			let hash = keccak().update(s).hex;
+		for (const s of labels) {
+			const hash = keccak().update(s).hex;
 			lines.push(`| ${[...s].length} | ${Buffer.from(s).length} | [\`${hash}\`](https://adraffy.github.io/ens-normalize.js/test/resolver.html#token:0x${hash})`);
 		}
 		return lines.join('\n');
@@ -72,57 +72,46 @@ class LengthMap extends Map {
 
 if (mode === 'sync') {
 	//let set = new Set(labels.filter(x => !x.includes('.')));
-	let set = new Set(labels);
-	console.log(`Before: ${labels.length}`);
-	for (let label of await fetch('https://alpha.antistupid.com/ens-regs/all.json').then(r => r.json())) {
-		// 20240910: this was using registered labels which might contain a stop
-		for (let part of label.split('.')) { 
-			set.add(part);
-		}
-	}
-	// 20240915: why wasn't i sorting this?!
-	set = [...set].map(explode_cp).sort(compare_arrays).map(x => String.fromCodePoint(...x));
-	let added = set.length - labels.length;
-	console.log(` After: ${set.length} (+${added})`);
-	if (added) {
-		writeFileSync(file, JSON.stringify(set, null, '\t'));
-	}
+	merge(await fetch('https://alpha.antistupid.com/ens-regs/all.json').then(r => r.json()));
+
+} else if (mode === 'add') {
+	merge(args);
 
 } else if (mode === 'text') {
 
-	let length_map = new LengthMap(labels);
-	let count = new Intl.NumberFormat('en-US').format(labels.length);
-	let date = new Date().toJSON().split('T')[0];
+	const length_map = new LengthMap(labels);
+	const count = new Intl.NumberFormat('en-US').format(labels.length);
+	const date = new Date().toJSON().split('T')[0];
 	
-	let size = (statSync(file).size / (1<<20)).toFixed(1) + 'MB';
-	let hash = createHash('sha256').update(data).digest('hex');
+	const size = (statSync(file).size / (1<<20)).toFixed(1) + 'MB';
+	const hash = createHash('sha256').update(data).digest('hex');
 	
-	let summary = `
+	const summary = `
 \`${count}\` unique, stop-free labels as of \`${date}\` collected from ENS contract events and primary name records.
 
 * [\`${size}\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${hash}\` (SHA256)
 `.trim();
 	
-	let files = [
+	const files = [
 		new URL('./README.md', import.meta.url),
 		new URL('./demo.html', import.meta.url)
 	];
-	let vars = {
+	const vars = {
 		summary,
 		table: length_map.make_length_table(),
 		longest: length_map.make_longest_table(),
 		size,
 	};
-	for (let file of files) {
-		let text = readFileSync(file, {encoding: 'utf-8'});
+	for (const f of files) {
+		let text = readFileSync(f, {encoding: 'utf-8'});
 		text = text.replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gmsu, (all, k) => {
 			let value = vars[k];
 			if (!value) throw new Error(`expected var: "${k}"`);
 			if (all.includes('\n')) value = `\n${value}\n`;
 			return `<!-- ${k} -->${value}<!-- /${k} -->`;
 		});
-		writeFileSync(file, text);
-		console.log(`Updated: ${file}`);
+		writeFileSync(f, text);
+		console.log(`Updated: ${f}`);
 	}
 } else if (mode === 'table.md') {
 	console.log(new LengthMap(labels).make_length_table(parseInt(args[0])));
@@ -162,6 +151,24 @@ function explode_cp(s) {
 function compare_arrays(a, b) {
 	let n = a.length;
 	let c = n - b.length;
-	for (let i = 0; c == 0 && i < n; i++) c = a[i] - b[i];
+	for (let i = 0; c === 0 && i < n; i++) c = a[i] - b[i];
 	return c;
+}
+
+function merge(newLabels) {
+	let set = new Set(labels);
+	console.log(`Before: ${labels.length}`);
+	for (const label of newLabels) {
+		// 20240910: this was using registered labels which might contain a stop
+		for (const part of label.split('.')) { 
+			set.add(part);
+		}
+	}
+	// 20240915: why wasn't i sorting this?!
+	set = [...set].map(explode_cp).sort(compare_arrays).map(x => String.fromCodePoint(...x));
+	const added = set.length - labels.length;
+	console.log(` After: ${set.length} (+${added})`);
+	if (added) {
+		writeFileSync(file, JSON.stringify(set, null, '\t'));
+	}
 }
