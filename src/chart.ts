@@ -85,12 +85,14 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 		out.push(pill(formatPercent(n, total), cx - 7, py, 18, `transform="rotate(-90 ${cx.toFixed(1)} ${py.toFixed(1)}) translate(0 7)"`));
 	});
 
-	// inset in the top-right quarter, above the short bars
+	// inset in the top-right quarter, above the short bars:
+	// from the top edge (inset by the right margin) to halfway down the plot
+	const inset = { x: M.left + plotW / 2 + 20, y: M.right, right: W - M.right, bottom: M.top + plotH / 2 - 20 };
 	out.push(renderInset(bytes, {
-		x: M.left + plotW / 2 + 20,
-		y: M.top,
-		w: plotW / 2 - 30,
-		h: plotH / 2 - 20,
+		x: inset.x,
+		y: inset.y,
+		w: inset.right - inset.x,
+		h: inset.bottom - inset.y,
 	}));
 
 	// axes
