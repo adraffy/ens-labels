@@ -129,6 +129,8 @@
 <line x1="919" x2="1546" y1="50.0" y2="50.0" stroke="rgba(136,136,136,0.3)" stroke-dasharray="4 4"/>
 <text x="911" y="50.0" font-size="16" text-anchor="end" dominant-baseline="middle">1M</text>
 <text x="1546" y="81.6" font-size="16" text-anchor="end" dominant-baseline="middle">+753 over 255</text>
+<line x1="995.2" x2="995.2" y1="50" y2="448" stroke="#888" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="1003.2" y="81.6" font-size="16" dominant-baseline="middle"><tspan font-weight="bold">99.33%</tspan> ≤ 31 bytes (1 word)</text>
 <rect x="919.00" y="325.9" width="2.46" height="122.1" fill="#3889ff"/>
 <rect x="921.46" y="264.7" width="2.46" height="183.3" fill="#3889ff"/>
 <rect x="923.92" y="149.2" width="2.46" height="298.8" fill="#3889ff"/>
