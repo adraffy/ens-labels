@@ -48,4 +48,4 @@ Other scripts: `index [--to <block>]`, `labels`, `distribution`, `chart`, `readm
 
 - `bun run readme` replaces the `<!-- key -->…<!-- /key -->` sections in `README.md` (`summary`, `longest`). Edit around the markers, not inside them.
 - `distribution.json` comes from `bun run distribution`: `{ total, codepoints, bytes }`, counts keyed by length.
-- `plot.svg` comes from `bun run chart`: the codepoint length distribution, with an inset of UTF-8 byte lengths 1–255. Don't edit either by hand.
+- `plot.svg` comes from `bun run chart`: the codepoint length distribution, with an inset of UTF-8 byte lengths 1–255 (log scale). Don't edit either by hand.

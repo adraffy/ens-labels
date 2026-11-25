@@ -82,7 +82,7 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	});
 
 	// inset in the top-right quarter, above the short bars
-	out.push(renderInset(bytes, total, {
+	out.push(renderInset(bytes, {
 		x: M.left + plotW / 2 + 20,
 		y: M.top,
 		w: plotW / 2 - 30,
@@ -102,36 +102,36 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 
 type Box = { x: number; y: number; w: number; h: number };
 
-// single-color bars of labels by UTF-8 byte length, 1 to bytes.max
-function renderInset({ counts, max: maxBytes, over }: ByteTally, total: number, box: Box) {
+// single-color bars of labels by UTF-8 byte length, 1 to bytes.max, log scale
+function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 	const P = { top: 56, right: 24, bottom: 44, left: 64 };
 	const x0 = box.x + P.left;
 	const y0 = box.y + P.top;
 	const w = box.w - P.left - P.right;
 	const h = box.h - P.top - P.bottom;
-	const pcts = counts.slice(1, maxBytes + 1).map((n) => (100 * n) / total);
-	const step = niceStep(Math.max(...pcts), 4);
-	const top = Math.ceil(Math.max(...pcts) / step) * step;
+	const values = counts.slice(1, maxBytes + 1);
+	const decades = Math.ceil(Math.log10(Math.max(...values)));
+	const floor = -0.3; // log10 of the baseline, so a count of 1 is still visible
 	const barW = w / maxBytes;
-	const y = (p: number) => y0 + h * (1 - p / top);
+	const y = (n: number) => y0 + h * (1 - (Math.log10(n) - floor) / (decades - floor));
 	const base = y0 + h;
 
 	const out = [
 		`<g>`,
 		`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="12" fill="${WASH}"/>`,
-		`<text x="${box.x + 20}" y="${box.y + 36}" font-size="22" font-weight="bold">UTF-8 Bytes</text>`,
+		`<text x="${box.x + 20}" y="${box.y + 36}" font-size="22" font-weight="bold">UTF-8 Bytes <tspan font-weight="normal" font-size="18">(log)</tspan></text>`,
 	];
 	if (over) {
 		out.push(`<text x="${box.x + box.w - 20}" y="${box.y + 36}" font-size="18" text-anchor="end">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
 	}
-	for (let p = step; p <= top + 1e-9; p += step) {
-		const gy = y(p).toFixed(1);
+	for (let d = 0; d <= decades; d++) {
+		const gy = y(10 ** d).toFixed(1);
 		out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${gy}" y2="${gy}" stroke="${GRID}" stroke-dasharray="4 4"/>`);
-		out.push(`<text x="${x0 - 8}" y="${gy}" font-size="16" text-anchor="end" dominant-baseline="middle">${+p.toFixed(6)}%</text>`);
+		out.push(`<text x="${x0 - 8}" y="${gy}" font-size="16" text-anchor="end" dominant-baseline="middle">${formatCount(10 ** d)}</text>`);
 	}
-	pcts.forEach((p, i) => {
-		if (!p) return;
-		const by = y(p);
+	values.forEach((n, i) => {
+		if (!n) return;
+		const by = y(n);
 		out.push(`<rect x="${(x0 + i * barW).toFixed(2)}" y="${by.toFixed(1)}" width="${barW.toFixed(2)}" height="${(base - by).toFixed(1)}" fill="${INSET}"/>`);
 	});
 	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
