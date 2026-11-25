@@ -6,7 +6,7 @@
 * [`49.3MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`060b66a1b2f13512989a0db7104f41d7453a62be9909df837448fcabd24c554e` (SHA256)
 <!-- /summary -->
 
-[**Demo**](https://adraffy.github.io/ens-labels/demo.html) ⭐
+[**Demo**](https://raffy.xyz/ens/labels.html) ⭐
 
 ![Plot](plot.svg)
 
@@ -24,12 +24,11 @@ bun run update   # index → labels → chart → readme
 | `bun run index [--to <block>]` | Resume indexing LabelStore events up to the finalized block.<br>Each range commits atomically: <kbd>^C</kbd> once to stop after the current range, twice to quit now. |
 | `bun run labels` | Write `labels.json` from the database (stop-free, valid UTF-8, sorted). |
 | `bun run chart [--max 30]` | Write `plot.svg` from `labels.json`. |
-| `bun run readme` | Update the stats in `README.md` and `demo.html`. |
+| `bun run readme` | Update the stats in `README.md`. |
 | `bun run merge [file.json…] [-l <label>…]` | Merge labels or names (split on `.`) into the database. |
 | `bun run invert <labelhash \| tokenId>` | Find the label of a labelhash or ENSv2 id (version bits ignored).<br>Falls back to `LabelStore.getLabel()` on-chain. |
 | `bun run invert -n <namehash> [-p <parent>]` | Find the label of `<label>.<parent>` from its namehash. |
 | `bun run lowest [-n 10]` | Known labels with the smallest labelhashes. |
-| `bun run demo [-p 8787]` | Serve [`demo.html`](./demo.html) locally. |
 
 ## Length Distribution
 
