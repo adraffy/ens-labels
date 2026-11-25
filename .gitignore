@@ -1,5 +1,6 @@
-old/
-Wolfram Player/
-*.nb
 node_modules/
 .DS_Store
+.env
+*.db
+*.db-shm
+*.db-wal
