@@ -3,437 +3,713 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>ENS Labelhash⁻¹</title>
+<link rel="icon" type="image/svg+xml" href="./favicon.svg">
 <style>
-.hide {
-	display: none !important;
+:root {
+	--bg: #f3f3f5;
+	--fg: #1d1d1f;
+	--muted: #6b6b72;
+	--card: #fff;
+	--border: #dadade;
+	--accent: #3b82f6;
+	--accent-soft: #3b82f622;
+	--ok: #16a34a;
+	--warn: #d97706;
+	--error: #dc2626;
+	--error-soft: #dc262612;
+	--mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
-button {
-	cursor: pointer;
-	text-decoration: none;
-	font-size: 100%;
-	padding: 4px 8px;
+@media (prefers-color-scheme: dark) {
+	:root {
+		--bg: #111214;
+		--fg: #e7e7ea;
+		--muted: #9a9aa2;
+		--card: #1b1c20;
+		--border: #303138;
+		--accent: #60a5fa;
+		--accent-soft: #60a5fa22;
+		--ok: #4ade80;
+		--warn: #fbbf24;
+		--error: #f87171;
+		--error-soft: #f8717114;
+	}
+}
+* {
+	box-sizing: border-box;
 }
 body {
-	margin: 3rem;
-	background: #eee;
+	margin: 0;
+	background: var(--bg);
+	color: var(--fg);
+	font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+a {
+	color: var(--accent);
+}
+code {
+	font-family: var(--mono);
+	font-size: 90%;
+}
+.page {
+	max-width: 960px;
+	margin: 0 auto;
+	padding: 2rem 1rem 3rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }
 header {
 	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.5rem 1rem;
 }
 header h1 {
 	flex: 1;
 	margin: 0;
+	font-size: 2rem;
+	letter-spacing: -0.02em;
 }
-h1 .count {
-	font-size: 60%;
-	font-weight: bold;
-}
-#github {
-	text-align: right;
-}
-#links {
-	margin-top: 4px;
-	display: flex;
-	flex-wrap: wrap;
+header h1 a {
+	display: inline-flex;
 	align-items: center;
-	gap: 4px 8px;
-}
-#links .code {
-	font-family: monospace;
-}
-#links .file {
-	display: flex;
-	align-items: baseline;
-	gap: 2px;
+	gap: 0.6rem;
+	color: inherit;
 	text-decoration: none;
 }
-#links .file code {
-	text-decoration: underline;
+header .logo {
+	width: 2rem;
+	height: 2rem;
 }
-#links .file span {
-	font: 70% sans-serif;
-	color: #666;
+#count {
+	font-size: 1rem;
+	font-weight: 500;
+	color: var(--muted);
 }
-#download {
-	user-select: none;
-}
-#input {
-	margin-top: 10px;
-}
-#name_field {
-	box-sizing: border-box;
-	width: 100%;
-	padding: 8px;
-	font-size: 16px;
-	font-family: monospace;
-}
-#examples {
-	margin-top: 8px;
+nav {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 4px;
+	gap: 0.25rem 1rem;
+	font-size: 0.9rem;
 }
-#examples button {
-	font-size: 90%;
-	padding: 3px 6px;
+nav .file small {
+	color: var(--muted);
 }
-#actions {
-	display: flex;
-	gap: 8px;
-	margin-top: 8px;
-	padding-top: 8px;
-	border-top: 2px solid #fff;
+.card {
+	background: var(--card);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	padding: 1rem;
 }
-main:empty {
-	display: none;
+button, .button {
+	font: inherit;
+	font-size: 0.9rem;
+	padding: 0.3rem 0.7rem;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: var(--bg);
+	color: var(--fg);
+	cursor: pointer;
+	text-decoration: none;
+	white-space: nowrap;
 }
-main {
-	margin-top: 16px;
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-	align-items: center;
-	justify-content: center;
+button:hover, .button:hover {
+	border-color: var(--accent);
 }
-main .tokens {
-	font-size: 36px;
+.primary {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #fff;
 }
-#name {
-	font-size: 24px;
-	background-color: #fff;
-	padding: 4px 8px;
-	border: 1px solid #ccc;
-	overflow-y: auto;
-	line-break: anywhere;
-	max-height: 5rem;
+#hash-input {
+	width: 100%;
+	padding: 0.7rem 0.8rem;
+	font: 1rem var(--mono);
+	color: var(--fg);
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	outline: none;
+}
+#hash-input:focus {
+	border-color: var(--accent);
+	box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .row {
 	display: flex;
-	gap: 8px;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
 }
-main p {
-	text-align: center;
-	margin: 0;
+.spacer {
+	flex: 1;
 }
-.status:empty {
+.input-card {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+#examples {
+	font-size: 0.85rem;
+}
+#examples span {
+	color: var(--muted);
+}
+#examples button {
+	font-size: 0.85rem;
+	padding: 0.15rem 0.5rem;
+}
+#status {
+	position: relative;
+	overflow: hidden;
+	font-size: 0.9rem;
+	padding: 0.5rem 0.8rem;
+	border-radius: 8px;
+	background: var(--card);
+	border: 1px solid var(--border);
+}
+#status:empty {
 	display: none;
 }
-.status {
-	margin-top: 8px;
-	padding: 8px 16px;
-	font-size: 18px;
+#status .bar {
+	position: absolute;
+	inset: 0 auto 0 0;
+	background: var(--accent-soft);
+	transition: width 0.1s;
 }
-.status button {
-	margin-left: 8px;
+#status span {
+	position: relative;
 }
-.status.error {
-	background-color: #fcc;
+#result:empty {
+	display: none;
 }
-#plot {
+#result {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+#result .label {
+	font-size: 2.25rem;
+	font-weight: 600;
+	line-height: 1.2;
+	overflow-wrap: anywhere;
+}
+#result .empty {
+	color: var(--muted);
+	font-style: italic;
+	font-weight: 400;
+}
+svg.icon {
+	width: 1em;
+	height: 1em;
+	flex: none;
+	vertical-align: -0.125em;
+}
+button, .button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+}
+.icon-button {
+	padding: 0.3rem 0.45rem;
+}
+.check {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.35rem;
+	font-size: 0.9rem;
+}
+.check.ok {
+	color: var(--ok);
+}
+.check.bad {
+	color: var(--warn);
+}
+.missing {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+	padding: 0.75rem;
+	border-radius: 8px;
+	background: var(--error-soft);
+	border: 1px solid var(--error);
+}
+.missing > svg.icon {
+	width: 2rem;
+	height: 2rem;
+	color: var(--error);
+}
+.missing b {
+	display: block;
+	font-size: 1.15rem;
+	color: var(--error);
+}
+.missing small {
+	color: var(--muted);
+}
+#result dl {
+	display: grid;
+	grid-template-columns: max-content 1fr;
+	gap: 0.25rem 1rem;
+	margin: 0;
+	font-size: 0.85rem;
+}
+#result dt {
+	color: var(--muted);
+}
+#result dd {
+	margin: 0;
+	font-family: var(--mono);
+	overflow-wrap: anywhere;
+}
+.note {
+	font-size: 0.85rem;
+	color: var(--warn);
+}
+.error {
+	color: var(--error);
+}
+#about ul {
+	margin: 0;
+	padding-left: 1.25rem;
+}
+#about li + li {
+	margin-top: 0.25rem;
+}
+#about img {
 	display: block;
 	width: 100%;
+	margin-top: 1rem;
 }
-#readme {
-	background-color: #ffc;
-	padding: 16px;
-	padding-left: 36px;
-	margin: 0;
-	font-size: 18px;
-	line-height: 1.7;
-	align-self: stretch;
-}
-#readme button {
-	font-size: 80%;
-}
-#readme code {
-	background-color: #cff;
-	padding: 1px;
-}
-#readme .inverse {
-	background-color: #afa;
+details summary {
+	cursor: pointer;
+	color: var(--muted);
 }
 textarea {
-	margin-top: 16px;
-	padding: 8px;
 	width: 100%;
-	box-sizing: border-box;
+	margin-top: 0.5rem;
+	padding: 0.6rem;
+	font: 0.9rem var(--mono);
+	color: var(--fg);
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 8px;
 	resize: vertical;
-	min-height: 5rem;
 }
 footer {
-	margin: 16px 0;
+	color: var(--muted);
+	font-size: 0.85rem;
 	text-align: center;
-	color: #666;
 }
-@media only screen and (max-width: 800px) { 
-	body {
-		margin: 1rem;
-	}
+.hidden {
+	display: none !important;
 }
 </style>
 </head>
 <body>
-<header>
-	<h1><a href="https://ens.domains">ENS</a> Labelhash⁻¹<span class="count" title="Number of known (hash, label)-pairs"></span></h1>
-	<div id="github">
+<div class="page">
+	<header>
+		<h1><a href="./demo.html"><img class="logo" src="./favicon.svg" alt="">ENS Labelhash⁻¹</a> <span id="count" title="Number of known (labelhash, label) pairs"></span></h1>
 		<a href="https://github.com/adraffy/ens-labels">adraffy/ens-labels</a>
-	</div>
-</header>
-<div id="links">
-	<a href="../ens-normalize.js/test/resolver.html"><b>Resolver</b></a>
-	<a href="../ens-normalize.js/test/emoji.html">Emoji</a>
-	<a href="../keccak.js/test/demo.html">Keccak Hasher</a>
-	<a href="https://raffy.antistupid.com/eth/ens-brute.html">Brute-force</a>
-	<a href="https://raffy.antistupid.com/eth/ens-regs.html">Registrations</a>
-	<a href="https://raffy.antistupid.com/eth/ens-renews.html">Renews</a>
-	<a href="https://raffy.antistupid.com/eth/ens-exp.html">Expirations</a>
-	<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code><span>(<!-- size -->49.3MB<!-- /size -->)</span></a> 
-	•
-	<a href="https://dune.com/ethereumnameservice/Old">Dune</a>
+	</header>
+	<nav>
+		<a href="https://raffy.xyz/ens/"><b>Resolver</b></a>
+		<a href="https://adraffy.github.io/keccak.js/test/demo.html">Keccak</a>
+		<a href="https://raffy.antistupid.com/eth/ens-brute.html">Brute-force</a>
+		<a href="https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba">LabelStore</a>
+		<a class="file" download href="./labels.json" title="Download labels as JSON"><code>labels.json</code> <small>(<!-- size -->49.3MB<!-- /size -->)</small></a>
+	</nav>
+	<section class="card input-card">
+		<input id="hash-input" placeholder="Labelhash or Token ID: 0xHEX or DEC" autocomplete="off" spellcheck="false" autofocus>
+		<div class="row">
+			<button id="hash-button" class="primary" title="Hash the input as a label">Hash Label</button>
+			<span class="spacer"></span>
+			<div id="examples" class="row">
+				<span>Examples:</span>
+				<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
+				<button data-hash="0x021cf935dbd31b6824d617240579dd5d943b7a6e2fe19576b0a87683f66c5255">orange-overlord</button>
+				<button data-hash="0x0029271c6712c743df20315ce930b37bd5aabcadb870ddf2b7925151c75c57e2">etherscanio</button>
+				<button data-hash="0x01626f5a5c7a2123527dce0a49a04d319c7961b20c7727286d8fd15f43f5508f">muchfunwowdoge</button>
+				<button data-hash="79233663829379634837589865448569342784712482819484549289560981379859480642508">vitalik</button>
+				<button data-hash="0xaf2caa1c2ca1d027f1ac823b529d0a67cd144264b2789fa2ea4d63a600000001" title="ENSv2 token ID (version 1)">vitalik (v2)</button>
+			</div>
+		</div>
+	</section>
+	<div id="status"></div>
+	<section id="result" class="card"></section>
+	<section id="about" class="card">
+		<ul>
+			<li>Enter a hash or click an example to find its label.</li>
+			<li>A <b>labelhash</b> is the <a href="https://adraffy.github.io/keccak.js/test/demo.html">keccak256</a> of the label encoded as UTF-8: <code>f(label) = hash</code> → <code>label ∈ f<sup>-1</sup>(hash)</code></li>
+			<li>The token ID of a <a href="https://opensea.io/assets/ethereum/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/79233663829379634837589865448569342784712482819484549289560981379859480642508">.eth ERC-721</a> is its labelhash. ENSv2 token IDs replace the low 32 bits with a version, and also match.</li>
+			<li>Labels are collected from ENS contract events, primary names, and the ENSv2 <a href="https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba">LabelStore</a>. Unknown hashes can be checked on-chain.</li>
+			<li><code>labels.json</code> is only downloaded when you search.</li>
+		</ul>
+		<a href="./plot.svg"><img src="./plot.svg" alt="Label length distribution"></a>
+	</section>
+	<details class="card">
+		<summary>Additional labels</summary>
+		<textarea id="extra" rows="6" placeholder="Labels separated by whitespace"></textarea>
+	</details>
+	<footer>Created by <a href="https://x.com/adraffy">raffy.eth</a></footer>
 </div>
-<div id="examples">
-	<button data-hash="0x00000425b4462e19460bedb4bccfcf16d270975ef882f03831bf3d40f7342355">rilxxlir</button>
-	<button data-hash="0x0000d9107d07a44f64888c5ecc821b7a8f7059c5c2ee18edfd1c040103f291a4">voicciov</button>
-	<button data-hash="0x0001640f2629bb323fca95bc13744478d5307ba0aca6e3a13f803691923ff00d">exrnnrxe</button>
-	<button data-hash="0x021cf935dbd31b6824d617240579dd5d943b7a6e2fe19576b0a87683f66c5255">orange-overlord</button>
-	<button data-hash="0x0029271c6712c743df20315ce930b37bd5aabcadb870ddf2b7925151c75c57e2">etherscanio</button>
-	<button data-hash="0x01626f5a5c7a2123527dce0a49a04d319c7961b20c7727286d8fd15f43f5508f">muchfunwowdoge</button>
-	<button data-hash="79233663829379634837589865448569342784712482819484549289560981379859480642508">vitalik</button>
-</div>
-<div id="actions">
-	<button id="hash_btn">Convert Input to Hash</button>
-	<span style="flex: 1"></span>
-	<button id="hexdec_btn">HEX↔DEC</button>
-</div>
-<div id="input">
-	<input id="name_field" placeholder="Labelhash: 0xHEX or DEC">
-</div>
-<div class="status" id="download"></div>
-<div class="status error" id="search"></div>
-<main>
-	<ul id="readme">
-		<li>Click an <button data-hash="0xf1b63dc799135ed42428eefabf817f11eb3b13a85389643c0c4925e3d2050f71">Example</button> to see how it works.</li>
-		<li><b>Labelhash</b> is <a target="_blank" href="../keccak.js/test/demo.html">256-bit Keccak</a> of the label encoded as UTF-8.</li>
-		<li>The <b>Token ID</b> of an <a target="_blank" href="https://opensea.io/assets/ethereum/0x57f1887a8bf19b14fc0df6fd9b2acc9af147ea85/79233663829379634837589865448569342784712482819484549289560981379859480642508">.eth ENS ERC-721 NFT</a> is a <b>Labelhash</b>.</li>
-		<li><code>f(label) = hash</code> &rarr; <code class="inverse">label ∈ f<sup>-1</sup>(hash)</code></li>
-		<li>Add bulk labels below for additional matching.</li>
-	</ul>
-	<a href="./plot.svg" target="_blank"><img id="plot" src="./plot.svg"></a>
-</main>
-<textarea placeholder="Additional Labels (separated by whitespace)" rows="10"></textarea>
-<footer>Created by <a href="https://twitter.com/adraffy">raffy.eth</a></footer>
-<script type="module">
-import {keccak} from '../keccak.js/dist/index.min.js';
-import {ens_tokenize, ens_beautify, dom_from_tokens, use_default_style} from '../ens-normalize.js/dist/all.min.js';
-use_default_style();
 
-const count_span = document.querySelector('h1 .count');
-const name_field = document.querySelector('#name_field');
-const init_status = document.querySelector('#download');
-const search_status = document.querySelector('#search');
-const main = document.querySelector('main');
-const more_ta = document.querySelector('textarea');
-const readme_dom = [...main.childNodes];
+<!-- labels live in a worker: download, hash, and lookup without blocking the page -->
+<script type="text/worker" id="worker-source">
+import { keccak } from "https://cdn.jsdelivr.net/npm/@adraffy/keccak@1.3.4/dist/index.min.js";
 
-const label_map = new Map();
+// keyed by the high 224 bits, so ENSv2 ids (low 32 bits = version) also match
+const labels = new Map();
+const keyOf = (hash) => hash.slice(0, 56);
+let state = "idle";
 
-let init;
-let current_hash;
-let current_label;
-let more_timer;
-
-for (let btn of document.querySelectorAll('[data-hash]')) {
-	btn.title = btn.dataset.hash;
-	btn.addEventListener('click', () => {
-		name_field.value = btn.dataset.hash;
-		update_hash();
-	});
-}
-
-name_field.addEventListener('input', update_hash);
-more_ta.addEventListener('input', () => {
-	if (more_timer) return;
-	more_timer = setTimeout(update_more, 100);
-});
-document.querySelector('#hash_btn').addEventListener('click', () => {
-	name_field.value = `0x${add_label(name_field.value.trim())}`;
-	update_count();
-	update_hash();
-});
-document.querySelector('#hexdec_btn').addEventListener('click', () => {
-	let s = name_field.value.trim();
-	if (/^0x[0-9a-f]+$/i.test(s)) {
-		name_field.value = BigInt(s).toString();
-	} else if (/^\d+$/.test(s)) {
-		name_field.value = '0x' + BigInt(s).toString(16).slice(-64).padStart(64, '0');
-	}
-});
-
-update_hash();
-update_more();
-
-function update_more() {
-	clearTimeout(more_timer);
-	more_timer = null;
-	let dirty;
-	for (let line of more_ta.value.split(/\s+/)) {
-		if (line) {
-			add_label(line);
-			dirty = true;
-		}
-	}
-	if (dirty) {
-		update_search();
-		update_count();
-	}
-}
-function update_hash() {
-	let hash = name_field.value.trim();
-	if (!hash) {
-		current_hash = current_label = null;
-		main.innerHTML = '';
-		main.append(...readme_dom);
-		search_status.innerHTML = '';
-		return;
-	}
-	if (!/^(0x[0-9a-f]{64}|\d+)$/i.test(hash)) {
-		current_hash = current_label = null
-		main.innerHTML = '';
-		search_status.innerHTML = '⚠️ Invalid hash format';
-		return;
-	}
-	current_hash = BigInt(hash).toString(16).slice(-64).padStart(64, '0');
-	current_label = false;
-	search();
-}
-function update_search() {
-	if (current_hash) {
-		search();
-	}
-}
-function update_count() {	
-	count_span.innerHTML = ` (${label_map.size.toLocaleString()})`;
-}
-
-function search() {
-	let label = label_map.get(current_hash);
-	if (label === current_label) return;
-	main.innerHTML = '';
-	current_label = label;
-	if (typeof label !== 'string') {
-		download();
-		search_status.innerHTML = `❓️ Unknown hash`;
-		if (init_status.isConnected) search_status.innerHTML += '—<i>still hashing</i>';
-		search_status.append(create_resolve_btn(`token:0x${current_hash}`, '↩️ Check Subgraph'));
-		return;
-	}
-	search_status.innerHTML = '';
-	if (label) {
-		main.append(dom_from_tokens(ens_tokenize(label)));
-	} else {
-		main.innerHTML = `<div class="tokens"><span class="ignored"><i>Empty String</i></span></div>`;
-	}
-
-	//let hash_hex = '0x' + current_hash;
-	
-	// let row_hex = document.createElement('p');
-	// row_hex.innerHTML = `<b>Labelhash</b>: <code>${hash_hex}</code>`;
-	// main.append(row_hex);
-
-	// let row_dec = document.createElement('p');
-	// row_dec.innerHTML = `<b>Token:</b> <code>${BigInt(hash_hex).toString()}</code>`;
-	// main.append(row_dec);
-
-	let row = document.createElement('div');
-	row.classList.add('row');
-	row.append(create_resolve_btn(`${label}.eth`, '↩️ Resolve'));
-	if (label) {
-		let copy_btn = document.createElement('button');
-		copy_btn.innerHTML = 'Copy';
-		copy_btn.addEventListener('click', () => {
-			navigator.clipboard.writeText(label);
-		});
-		row.append(copy_btn);
-	}
-	main.append(row);
-}
-
-function download() {
-	if (init) return;
-	init = true;
-	let xhr = new XMLHttpRequest();
-	let prog = 0;
-	let render_id;
-	update();
-	xhr.addEventListener('progress', e => {
-		prog = 100 * e.loaded / e.total; // this fires way too much
-	});
-	xhr.addEventListener('load', () => {
-		cancelAnimationFrame(render_id);
-		try {
-			compute_hashes(JSON.parse(xhr.responseText), 0);
-		} catch (err) {
-			error('Unable to parse labels');
-		}
-	});
-	xhr.addEventListener('error', () => {
-		error('Download failed');
-	});
-	//xhr.open('GET', './old/test-labels.json');
-	xhr.open('GET', './labels.json');
-	xhr.send();
-	function update() {
-		render_id = requestAnimationFrame(update);
-		init_status.innerHTML = `⏳️ Downloading (${prog.toFixed(0)}%)`;
-		init_status.style.background = progress_gradient(prog, '#aaf', '#ccf'); 
-		update_search();
-	}
-	function error(s) {
-		cancelAnimationFrame(render_id);
-		init_status.classList.add('error');
-		init_status.innerHTML = `⚠️ ${error}`;
-	}
-}
-
-function compute_hashes(labels, i) {
-	const N = 4096;
-	let p = 100 * i / Math.max(1, labels.length);
-	init_status.style.background = progress_gradient(p, '#0e0 ', '#8f8'); 
-	init_status.innerHTML = `👨‍💻 Hashing (${p.toFixed(0)}%)`;
-	for (let end = Math.min(labels.length, i + N); i < end; i++) {
-		add_label(labels[i]);
-	}
-	if (i < labels.length) {
-		setTimeout(() => compute_hashes(labels, i), 0);
-	} else {
-		current_label = false; // force update
-		init_status.remove();
-	}
-	update_count();
-	update_search();
-}
-function add_label(label) {
-	let hash = keccak().update(label).hex;
-	label_map.set(hash, label);
+function addLabel(label) {
+	const hash = keccak().update(label).hex;
+	labels.set(keyOf(hash), label);
 	return hash;
 }
 
-function create_resolve_btn(label, html) {
-	let a = document.createElement('a');
-	a.href = `../ens-normalize.js/test/resolver.html#${encodeURIComponent(label)}`;
-	a.innerHTML = ``;
-	a.target = '_blank';
-	let btn = document.createElement('button');
-	btn.innerHTML = html;
-	a.append(btn);
-	return a;
+function post(message) {
+	postMessage({ ...message, count: labels.size });
 }
 
-function progress_gradient(p, bar, bg = '#ccc') {
-	return `linear-gradient(to right, ${bar} ${p}%, ${bg} ${p+0.1}%)`;
+async function load(url) {
+	state = "download";
+	const res = await fetch(url);
+	if (!res.ok) throw new Error(`HTTP ${res.status}`);
+	// content-length is the compressed size when the response is encoded
+	const total = res.headers.get("content-encoding") ? 0 : Number(res.headers.get("content-length")) || 0;
+	const reader = res.body.getReader();
+	const chunks = [];
+	let loaded = 0;
+	let last = 0;
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		chunks.push(value);
+		loaded += value.length;
+		if (performance.now() - last > 100) {
+			last = performance.now();
+			post({ type: "progress", state, loaded, total });
+		}
+	}
+	const list = JSON.parse(await new Blob(chunks).text());
+	state = "hash";
+	for (let i = 0; i < list.length; ) {
+		const end = Math.min(list.length, i + 50000);
+		for (; i < end; i++) addLabel(list[i]);
+		post({ type: "progress", state, loaded: i, total: list.length });
+		await new Promise((resolve) => setTimeout(resolve)); // let lookups through
+	}
+	state = "ready";
+	post({ type: "progress", state });
 }
 
+onmessage = ({ data }) => {
+	switch (data.type) {
+		case "load": {
+			if (state !== "idle") return;
+			load(data.url).catch((err) => {
+				state = "error";
+				post({ type: "progress", state, error: String(err) });
+			});
+			return;
+		}
+		case "add": {
+			for (const label of data.labels) addLabel(label);
+			post({ type: "added" });
+			return;
+		}
+		case "find": {
+			const label = labels.get(keyOf(data.hash));
+			const exact = label !== undefined && keccak().update(label).hex === data.hash;
+			post({ type: "found", id: data.id, hash: data.hash, label, exact, state });
+			return;
+		}
+	}
+};
+</script>
+
+<script type="module">
+import { keccak } from "https://cdn.jsdelivr.net/npm/@adraffy/keccak@1.3.4/dist/index.min.js";
+import { ens_normalize as normalize } from "https://cdn.jsdelivr.net/npm/@adraffy/ens-normalize@1.11.1/dist/index.min.js";
+
+const RPC_URL = "https://ethereum-rpc.publicnode.com";
+const LABEL_STORE = "0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba";
+const RESOLVER_URL = "https://raffy.xyz/ens/";
+
+const $ = (selector) => document.querySelector(selector);
+const input = $("#hash-input");
+const status = $("#status");
+const result = $("#result");
+const about = $("#about");
+const count = $("#count");
+const extra = $("#extra");
+
+const worker = new Worker(
+	URL.createObjectURL(new Blob([$("#worker-source").textContent], { type: "text/javascript" })),
+	{ type: "module" },
+);
+
+let current; // { id, hash, label } of the latest lookup
+let rendered; // what the result shows, to skip identical renders
+let loadState = "idle";
+let nextId = 0;
+
+worker.addEventListener("message", ({ data }) => {
+	count.textContent = data.count ? `(${data.count.toLocaleString()})` : "";
+	switch (data.type) {
+		case "progress": {
+			loadState = data.state;
+			renderStatus(data);
+			if (data.state !== "download" && current && current.label === undefined) find(current.hash); // retry as labels arrive
+			return;
+		}
+		case "added": {
+			if (current && current.label === undefined) find(current.hash);
+			return;
+		}
+		case "found": {
+			if (data.id !== current?.id) return;
+			current.label = data.label;
+			const key = JSON.stringify([data.hash, data.label, data.state === "ready"]);
+			if (key !== rendered) renderResult(data);
+			rendered = key;
+			return;
+		}
+	}
+});
+
+// 0x-hex, bare hex, or decimal → 64 hex chars (no 0x), else undefined
+function parseHash(s) {
+	s = s.trim();
+	if (!/^(0x[0-9a-f]{1,64}|[0-9a-f]{64}|\d+)$/i.test(s)) return;
+	const n = BigInt(/^[0-9a-f]{64}$/i.test(s) ? `0x${s}` : s);
+	if (n >> 256n) return;
+	return n.toString(16).padStart(64, "0");
+}
+
+function find(hash) {
+	current = { id: ++nextId, hash };
+	worker.postMessage({ type: "find", id: current.id, hash });
+}
+
+function update() {
+	const text = input.value.trim();
+	history.replaceState(null, "", text ? `#${text}` : location.pathname);
+	rendered = undefined;
+	if (!text) {
+		current = undefined;
+		result.replaceChildren();
+		about.classList.remove("hidden");
+		return;
+	}
+	about.classList.add("hidden");
+	const hash = parseHash(text);
+	if (!hash) {
+		current = undefined;
+		result.replaceChildren(element("div", { className: "error" }, "Expected a 32-byte hash: 0xHEX or DEC (or use Hash Label)"));
+		return;
+	}
+	if (loadState === "idle") {
+		worker.postMessage({ type: "load", url: new URL("./labels.json", location.href).href });
+	}
+	find(hash);
+}
+
+function renderStatus({ state, loaded, total, error }) {
+	if (state === "ready") {
+		status.replaceChildren();
+		return;
+	}
+	if (state === "error") {
+		status.replaceChildren(element("span", { className: "error" }, `Unable to load labels: ${error}`));
+		return;
+	}
+	const pct = total ? Math.min(100, (100 * loaded) / total) : 0;
+	const text = state === "download"
+		? `Downloading labels… ${(loaded / 2 ** 20).toFixed(1)}MB${total ? ` (${pct.toFixed(0)}%)` : ""}`
+		: `Hashing labels… ${pct.toFixed(0)}%`;
+	const bar = element("div", { className: "bar" });
+	bar.style.width = `${pct}%`;
+	status.replaceChildren(bar, element("span", {}, text));
+}
+
+function renderResult({ hash, label, exact }) {
+	if (label === undefined) {
+		const pending = loadState !== "ready" && loadState !== "error";
+		const check = element("button", {}, "Check LabelStore");
+		check.addEventListener("click", () => checkLabelStore(hash, check));
+		result.replaceChildren(
+			element("div", { className: "missing" },
+				icon("searchX"),
+				element("div", {},
+					element("b", {}, "Unknown hash"),
+					element("small", {}, pending ? "Still loading labels…" : "Not found in labels.json"),
+				),
+				element("span", { className: "spacer" }),
+				check,
+				resolveLink(hash),
+			),
+			details(hash, { unknown: true }),
+		);
+		return;
+	}
+	const labelhash = exact ? hash : keccak().update(label).hex;
+	const { ok, message } = checkLabel(label);
+	result.replaceChildren(
+		element("div", { className: "label" }, label || element("span", { className: "empty" }, "Empty string")),
+		element("div", { className: "row" },
+			element("span", { className: `check ${ok ? "ok" : "bad"}`, title: ok ? "ENSIP-15" : "" }, icon(ok ? "circleCheck" : "triangleAlert"), message),
+			exact ? "" : element("span", { className: "check bad" }, icon("info"), "Matched ignoring the low 32 bits (ENSv2 token version)"),
+			element("span", { className: "spacer" }),
+			resolveLink(labelhash, label),
+			copyButton(label),
+		),
+		details(labelhash, { input: exact ? undefined : hash }),
+	);
+}
+
+// a label should be a single normalized label
+function checkLabel(label) {
+	if (!label) return { ok: false, message: "Empty label" };
+	if (label.includes(".")) return { ok: false, message: 'Contains a stop "." (not a single label)' };
+	try {
+		const norm = normalize(label);
+		return norm === label
+			? { ok: true, message: "Normalized" }
+			: { ok: false, message: `Not normalized: expected "${norm}"` };
+	} catch (err) {
+		return { ok: false, message: err.message };
+	}
+}
+
+function copyButton(text) {
+	const button = element("button", { className: "icon-button", title: "Copy label", ariaLabel: "Copy label" }, icon("copy"));
+	button.addEventListener("click", async () => {
+		await navigator.clipboard.writeText(text);
+		button.replaceChildren(icon("check"));
+		setTimeout(() => button.replaceChildren(icon("copy")), 1000);
+	});
+	return button;
+}
+
+// <label>.eth when addressable by name, else by id
+function resolveLink(hash, label) {
+	const named = label && !label.includes(".");
+	const target = named ? `${label}.eth` : `id:0x${hash}`;
+	return element("a", {
+		className: "button",
+		href: `${RESOLVER_URL}#${named ? `${encodeURIComponent(label)}.eth` : target}`,
+		target: "_blank",
+		title: `Resolve ${target}`,
+	}, "Resolve", icon("externalLink"));
+}
+
+// lucide.dev icons
+const ICONS = {
+	copy: '<rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+	check: '<path d="M20 6 9 17l-5-5"/>',
+	circleCheck: '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+	triangleAlert: '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+	info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+	externalLink: '<path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h3"/>',
+	searchX: '<path d="m13.5 8.5-5 5"/><path d="m8.5 8.5 5 5"/><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+};
+
+function icon(name) {
+	const template = document.createElement("template");
+	template.innerHTML = `<svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+	return template.content.firstChild;
+}
+
+function details(hash, { unknown, input } = {}) {
+	const rows = [
+		[unknown ? "Hex" : "Labelhash", `0x${hash}`],
+		[unknown ? "Decimal" : "Token ID", BigInt(`0x${hash}`).toString()],
+	];
+	if (input) rows.push(["Input", `0x${input}`]);
+	return element("dl", {}, ...rows.flatMap(([k, v]) => [element("dt", {}, k), element("dd", {}, v)]));
+}
+
+// LabelStore.getLabel(uint256) on-chain
+async function checkLabelStore(hash, button) {
+	button.disabled = true;
+	button.textContent = "Checking…";
+	try {
+		const selector = keccak().update("getLabel(uint256)").hex.slice(0, 8);
+		const res = await fetch(RPC_URL, {
+			method: "POST",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({
+				jsonrpc: "2.0",
+				id: 1,
+				method: "eth_call",
+				params: [{ to: LABEL_STORE, data: `0x${selector}${hash}` }, "latest"],
+			}),
+		}).then((r) => r.json());
+		if (res.error) throw new Error(res.error.message);
+		const data = res.result.slice(2);
+		const offset = 2 * Number(BigInt(`0x${data.slice(0, 64)}`));
+		const size = 2 * Number(BigInt(`0x${data.slice(offset, offset + 64)}`));
+		const bytes = Uint8Array.from(data.slice(offset + 64, offset + 64 + size).match(/../g) ?? [], (x) => parseInt(x, 16));
+		if (!bytes.length) {
+			button.textContent = "Not in LabelStore";
+			return;
+		}
+		worker.postMessage({ type: "add", labels: [new TextDecoder().decode(bytes)] });
+	} catch (err) {
+		button.disabled = false;
+		button.textContent = "Check LabelStore";
+		alert(`LabelStore lookup failed: ${err.message}`);
+	}
+}
+
+function element(tag, props, ...children) {
+	const e = Object.assign(document.createElement(tag), props);
+	e.append(...children);
+	return e;
+}
+
+input.addEventListener("input", update);
+
+$("#hash-button").addEventListener("click", () => {
+	const label = input.value.trim();
+	if (parseHash(label) && !confirm("Input looks like a hash. Hash it as a label anyway?")) return;
+	worker.postMessage({ type: "add", labels: [label] });
+	input.value = `0x${keccak().update(label).hex}`;
+	update();
+});
+
+for (const button of document.querySelectorAll("[data-hash]")) {
+	button.title ||= button.dataset.hash;
+	button.addEventListener("click", () => {
+		input.value = button.dataset.hash;
+		update();
+	});
+}
+
+let extraTimer;
+extra.addEventListener("input", () => {
+	clearTimeout(extraTimer);
+	extraTimer = setTimeout(() => {
+		const labels = extra.value.split(/\s+/).filter(Boolean);
+		if (labels.length) worker.postMessage({ type: "add", labels });
+	}, 250);
+});
+
+// #<hash> links, including edits to the address bar
+function readLocation() {
+	const text = decodeURIComponent(location.hash.slice(1));
+	if (text === input.value.trim()) return;
+	input.value = text;
+	update();
+}
+window.addEventListener("hashchange", readLocation);
+readLocation();
 </script>
 </body>
 </html>

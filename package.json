@@ -16,7 +16,8 @@
 		"update": "bun run index && bun run labels && bun run chart && bun run readme",
 		"invert": "bun scripts/invert.ts",
 		"lowest": "bun scripts/lowest.ts",
-		"check": "tsc --noEmit"
+		"check": "tsc --noEmit",
+		"demo": "bun scripts/demo.ts"
 	},
 	"dependencies": {
 		"viem": "^2.58.6"

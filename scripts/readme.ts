@@ -1,12 +1,12 @@
 // fill the <!-- key -->...<!-- /key --> sections of README.md and demo.html
 // usage: bun run readme
 
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { DB_FILE, DEMO_FILE, LABEL_STORE, LABELS_FILE, README_FILE } from "../src/config.ts";
 import { countLabels, getMeta, openDB } from "../src/db.ts";
 import { labelhash, toHex } from "../src/hash.ts";
-import { lengthTally, longestLabels, percent, readLabels } from "../src/stats.ts";
+import { lengthTally, longestLabels, percent, parseLabels } from "../src/stats.ts";
 
 parseArgs({ options: {} }); // no options, rejects stray args
 
@@ -36,8 +36,8 @@ function indexState() {
 	if (!existsSync(DB_FILE)) return;
 	const db = openDB();
 	try {
-		const block = getMeta<number>(db, "last_block");
-		const timestamp = getMeta<number>(db, "last_timestamp");
+		const block = getMeta<number>(db, "lastBlock");
+		const timestamp = getMeta<number>(db, "lastTimestamp");
 		if (block === undefined) return;
 		return { block, timestamp, store: countLabels(db).store };
 	} finally {
@@ -45,9 +45,8 @@ function indexState() {
 	}
 }
 
-const file = Bun.file(LABELS_FILE);
-const data = await file.bytes();
-const labels = await readLabels();
+const data = readFileSync(LABELS_FILE);
+const labels = parseLabels(data);
 const state = indexState();
 
 const size = `${(data.length / (1 << 20)).toFixed(1)}MB`;

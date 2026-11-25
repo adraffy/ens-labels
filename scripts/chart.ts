@@ -13,6 +13,6 @@ const { values } = parseArgs({
 	},
 });
 
-const tally = lengthTally(await readLabels(), Number(values.max));
+const tally = lengthTally(readLabels(), Number(values.max));
 await Bun.write(values.out, renderChart(tally));
 console.log(`Wrote: ${values.out}`);

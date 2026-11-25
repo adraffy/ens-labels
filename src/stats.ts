@@ -1,7 +1,12 @@
+import { readFileSync } from "node:fs";
 import { LABELS_FILE } from "./config.ts";
 
-export async function readLabels(): Promise<string[]> {
-	return Bun.file(LABELS_FILE).json();
+export function parseLabels(data: Buffer): string[] {
+	return JSON.parse(data.toString());
+}
+
+export function readLabels() {
+	return parseLabels(readFileSync(LABELS_FILE));
 }
 
 // count of labels by codepoint length: [0, 1, ..., max-1, max+]

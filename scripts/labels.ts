@@ -1,6 +1,7 @@
 // build labels.json from the database: stop-free (no "."), valid UTF-8, sorted
 // usage: bun run labels
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { LABELS_FILE } from "../src/config.ts";
 import { openDB } from "../src/db.ts";
@@ -20,12 +21,11 @@ db.close();
 const labels = rows.map((r) => r.label).filter((s) => !s.includes("."));
 const stopped = rows.length - labels.length;
 
-const file = Bun.file(values.out);
-const exists = await file.exists();
-const before = exists ? ((await file.json()) as string[]).length : 0;
+const old = existsSync(values.out) ? readFileSync(values.out, "utf8") : undefined;
+const before = old ? (JSON.parse(old) as string[]).length : 0;
 const json = JSON.stringify(sortLabels(labels), null, "\t");
-const changed = !exists || (await file.text()) !== json;
-if (changed) await Bun.write(file, json);
+const changed = old !== json;
+if (changed) writeFileSync(values.out, json);
 
 const delta = labels.length - before;
 console.log(`Labels: ${labels.length} (${delta < 0 ? "" : "+"}${delta})`);

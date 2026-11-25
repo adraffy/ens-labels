@@ -1,7 +1,7 @@
 # ens-labels
 
 <!-- summary -->
-`3,428,945` unique, stop-free labels as of `2026-11-25` collected from ENS contract events, primary name records, and the [ENSv2 LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,782` labels through block [`26494924`](https://etherscan.io/block/26494924)).
+`3,428,945` unique, stop-free labels as of `2026-11-25` collected from ENS contract events, primary name records, and the [ENSv2 LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,783` labels through block [`26494988`](https://etherscan.io/block/26494988)).
 
 * [`49.3MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`060b66a1b2f13512989a0db7104f41d7453a62be9909df837448fcabd24c554e` (SHA256)
 <!-- /summary -->
@@ -29,6 +29,7 @@ bun run update   # index → labels → chart → readme
 | `bun run invert <labelhash \| tokenId>` | Find the label of a labelhash or ENSv2 id (version bits ignored).<br>Falls back to `LabelStore.getLabel()` on-chain. |
 | `bun run invert -n <namehash> [-p <parent>]` | Find the label of `<label>.<parent>` from its namehash. |
 | `bun run lowest [-n 10]` | Known labels with the smallest labelhashes. |
+| `bun run demo [-p 8787]` | Serve [`demo.html`](./demo.html) locally. |
 
 ## Length Distribution
 

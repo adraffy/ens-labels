@@ -44,12 +44,12 @@ const stopAt = values.to ? BigInt(values.to) : undefined;
 
 const db = openDB();
 
-// each range commits atomically with last_block, so any exit resumes cleanly:
+// each range commits atomically with lastBlock, so any exit resumes cleanly:
 // ^C once to finish the current range, twice to quit now (the in-flight range is refetched)
 let stopping = false;
 process.on("SIGINT", () => {
 	if (stopping) {
-		console.log(`\nAborted, resume from block ${(getMeta<number>(db, "last_block") ?? LABEL_STORE_BLOCK - 1) + 1}`);
+		console.log(`\nAborted, resume from block ${(getMeta<number>(db, "lastBlock") ?? LABEL_STORE_BLOCK - 1) + 1}`);
 		process.exit(130);
 	}
 	stopping = true;
@@ -71,7 +71,7 @@ setMeta(db, "address", LABEL_STORE);
 
 const head = await client.getBlock({ blockTag: "finalized" });
 const end = stopAt !== undefined && stopAt < head.number ? stopAt : head.number;
-const start = BigInt(getMeta<number>(db, "last_block") ?? LABEL_STORE_BLOCK - 1) + 1n;
+const start = BigInt(getMeta<number>(db, "lastBlock") ?? LABEL_STORE_BLOCK - 1) + 1n;
 let step = BigInt(getMeta<number>(db, "step") ?? 2_000);
 
 console.log(`RPC: ${RPC_URL}`);
@@ -88,9 +88,9 @@ const commit = db.transaction((logs: LabelLog[], to: bigint) => {
 		const { hash, label, raw, block } = decodeLabel(log);
 		added += upsert.run(hash, label, raw, block).changes;
 	}
-	setMeta(db, "last_block", Number(to));
+	setMeta(db, "lastBlock", Number(to));
 	setMeta(db, "step", Number(step));
-	if (to === head.number) setMeta(db, "last_timestamp", Number(head.timestamp));
+	if (to === head.number) setMeta(db, "lastTimestamp", Number(head.timestamp));
 	return added;
 });
 
@@ -126,5 +126,5 @@ for (let from = start; from <= end && !stopping; ) {
 const { total, store } = countLabels(db);
 const secs = ((performance.now() - t0) / 1000).toFixed(1);
 console.log(`Indexed ${events} events in ${secs}s`);
-console.log(`Labels: ${total} (${store} from LabelStore) through block ${getMeta(db, "last_block")}`);
+console.log(`Labels: ${total} (${store} from LabelStore) through block ${getMeta(db, "lastBlock")}`);
 db.close();
