@@ -4,7 +4,7 @@
 import { parseArgs } from "node:util";
 import { CHART_FILE } from "../src/config.ts";
 import { renderChart } from "../src/chart.ts";
-import { lengthTally, readLabels } from "../src/stats.ts";
+import { byteTally, lengthTally, readLabels } from "../src/stats.ts";
 
 const { values } = parseArgs({
 	options: {
@@ -13,6 +13,6 @@ const { values } = parseArgs({
 	},
 });
 
-const tally = lengthTally(readLabels(), Number(values.max));
-await Bun.write(values.out, renderChart(tally));
+const labels = readLabels();
+await Bun.write(values.out, renderChart(lengthTally(labels, Number(values.max)), byteTally(labels)));
 console.log(`Wrote: ${values.out}`);

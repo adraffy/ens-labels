@@ -14,3 +14,4 @@ const root = new URL("../", import.meta.url);
 export const LABELS_FILE = new URL("labels.json", root);
 export const README_FILE = new URL("README.md", root);
 export const CHART_FILE = new URL("plot.svg", root);
+export const DISTRIBUTION_FILE = new URL("distribution.json", root);
