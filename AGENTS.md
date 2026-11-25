@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from the legacy collection (ENS contract events and primary names) plus `Label` events indexed from the ENSv2 LabelStore.
+Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from the legacy collection (ENS contract events and primary names) plus `Label` events indexed from the ENSv2 LabelStore. The demo lives at [raffy.xyz/ens/labels.html](https://raffy.xyz/ens/labels.html), not in this repo.
 
 ## Stack
 
@@ -13,8 +13,7 @@ Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from
 
 - `src/` is library code: config, database, RPC client, hashing, sorting, stats, chart rendering.
 - `scripts/` holds one CLI entrypoint per `package.json` script, each parsing args with `parseArgs`.
-- `demo.html` is a single static page with no build. Its dependencies are pinned jsDelivr ESM URLs, and labels are hashed in an inline module worker.
-- `favicon.svg`, `plot.svg`, and `README.md` are partly generated (see below).
+- `plot.svg` and parts of `README.md` are generated (see below).
 
 ## Commands
 
@@ -22,7 +21,6 @@ Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from
 bun i
 bun run check    # tsc --noEmit, run after any TypeScript change
 bun run update   # index → labels → chart → readme
-bun run demo     # serve the repo at http://localhost:8787/demo.html
 ```
 
 Other scripts: `index [--to <block>]`, `labels`, `chart`, `readme`, `merge [file.json…] [-l <label>…]`, `invert <hash> | -n <namehash> [-p <parent>]`, `lowest [-n 10]`.
@@ -48,11 +46,5 @@ Other scripts: `index [--to <block>]`, `labels`, `chart`, `readme`, `merge [file
 
 ## Generated content
 
-- `bun run readme` replaces `<!-- key -->…<!-- /key -->` sections in `README.md` and `demo.html` (`summary`, `table`, `longest`, `size`). Edit around the markers, not inside them.
+- `bun run readme` replaces the `<!-- key -->…<!-- /key -->` sections in `README.md` (`summary`, `table`, `longest`). Edit around the markers, not inside them.
 - `plot.svg` comes from `bun run chart`. Don't edit it by hand.
-
-## Demo
-
-- Resolve links go to `https://raffy.xyz/ens/`: `#<label>.eth` for a known label, `#id:0x<hash>` otherwise.
-- Hashes match on the high 224 bits, so ENSv2 token IDs (low 32 bits = version) find their label.
-- Verify changes in a browser via `bun run demo`, in both light and dark mode.

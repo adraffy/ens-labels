@@ -13,5 +13,4 @@ export const DB_FILE = process.env.DB_FILE ?? "labels.db";
 const root = new URL("../", import.meta.url);
 export const LABELS_FILE = new URL("labels.json", root);
 export const README_FILE = new URL("README.md", root);
-export const DEMO_FILE = new URL("demo.html", root);
 export const CHART_FILE = new URL("plot.svg", root);

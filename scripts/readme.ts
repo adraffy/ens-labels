@@ -1,9 +1,9 @@
-// fill the <!-- key -->...<!-- /key --> sections of README.md and demo.html
+// fill the <!-- key -->...<!-- /key --> sections of README.md
 // usage: bun run readme
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { DB_FILE, DEMO_FILE, LABEL_STORE, LABELS_FILE, README_FILE } from "../src/config.ts";
+import { DB_FILE, LABEL_STORE, LABELS_FILE, README_FILE } from "../src/config.ts";
 import { countLabels, getMeta, openDB } from "../src/db.ts";
 import { labelhash, toHex } from "../src/hash.ts";
 import { lengthTally, longestLabels, percent, parseLabels } from "../src/stats.ts";
@@ -64,17 +64,13 @@ const vars: Record<string, string> = {
 `.trim(),
 	table: lengthTable(lengthTally(labels)),
 	longest: longestTable(longestLabels(labels)),
-	size,
 };
 
-for (const url of [README_FILE, DEMO_FILE]) {
-	const f = Bun.file(url);
-	const text = (await f.text()).replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gsu, (all, k: string) => {
-		let value = vars[k];
-		if (value === undefined) throw new Error(`unknown section: "${k}" in ${url.pathname}`);
-		if (all.includes("\n")) value = `\n${value}\n`;
-		return `<!-- ${k} -->${value}<!-- /${k} -->`;
-	});
-	await Bun.write(f, text);
-	console.log(`Updated: ${url.pathname}`);
-}
+const text = readFileSync(README_FILE, "utf8").replace(/<!--\s*([a-z]+)\s*-->.*?<!--\s*\/\1\s*-->/gsu, (all, k: string) => {
+	let value = vars[k];
+	if (value === undefined) throw new Error(`unknown section: "${k}"`);
+	if (all.includes("\n")) value = `\n${value}\n`;
+	return `<!-- ${k} -->${value}<!-- /${k} -->`;
+});
+writeFileSync(README_FILE, text);
+console.log(`Updated: ${README_FILE.pathname}`);
