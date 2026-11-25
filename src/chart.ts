@@ -36,9 +36,13 @@ function escape(s: string) {
 	return s.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
+function pillWidth(text: string, size: number) {
+	return text.length * size * 0.56 + 12;
+}
+
 // text on a rounded wash, (x, y) is the left baseline
 function pill(text: string, x: number, y: number, size: number, extra = "") {
-	const w = text.length * size * 0.56 + 12;
+	const w = pillWidth(text, size);
 	const h = size * 1.3;
 	return [
 		`<g ${extra}>`,
@@ -93,8 +97,7 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	const base = M.top + plotH;
 	out.push(`<line x1="${M.left}" x2="${W - M.right}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="2"/>`);
 	out.push(`<line x1="${M.left}" x2="${M.left}" y1="${M.top - 30}" y2="${base}" stroke="${INK}" stroke-width="2"/>`);
-	out.push(pill("Length", W - M.right - 90, base + 45, 24, `font-weight="bold"`));
-	out.push(pill("Labels", M.left - 85, M.top - 50, 24, `font-weight="bold"`));
+	out.push(axisTitle("Codepoints", M.left + plotW / 2, base + 45, 24));
 
 	out.push(`</svg>`);
 	return out.join("\n");
@@ -104,7 +107,7 @@ type Box = { x: number; y: number; w: number; h: number };
 
 // single-color bars of labels by UTF-8 byte length, 1 to bytes.max, log scale
 function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
-	const P = { top: 20, right: 24, bottom: 44, left: 64 };
+	const P = { top: 20, right: 24, bottom: 72, left: 64 };
 	const x0 = box.x + P.left;
 	const y0 = box.y + P.top;
 	const w = box.w - P.left - P.right;
@@ -141,6 +144,12 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		out.push(`<text x="${tx}" y="${base + 26}" font-size="16" text-anchor="middle">${b}</text>`);
 	}
 	out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`);
+	out.push(axisTitle("Bytes", x0 + w / 2, base + 56, 18));
 	out.push(`</g>`);
 	return out.join("\n");
+}
+
+// bold pill centered on x
+function axisTitle(text: string, cx: number, y: number, size: number) {
+	return pill(text, cx - pillWidth(text, size) / 2 + 6, y, size, `font-weight="bold"`);
 }
