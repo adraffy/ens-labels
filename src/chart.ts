@@ -11,6 +11,7 @@ const INK = "#888";
 const WASH = "rgba(136,136,136,0.15)";
 const GRID = "rgba(136,136,136,0.3)";
 const INSET = "#3889ff";
+const WORD = 31; // max bytes of a string that fits in one storage word
 
 function niceStep(max: number, ticks = 10) {
 	const raw = max / ticks;
@@ -130,11 +131,17 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${gy}" y2="${gy}" stroke="${GRID}" stroke-dasharray="4 4"/>`);
 		out.push(`<text x="${x0 - 8}" y="${gy}" font-size="16" text-anchor="end" dominant-baseline="middle">${formatCount(10 ** d)}</text>`);
 	}
+	// notes go between the top two grid lines, above the short tail bars
+	const noteY = y(10 ** (decades - 0.5)).toFixed(1);
 	if (over) {
-		// between the top two grid lines, above the short tail bars
-		const oy = y(10 ** (decades - 0.5)).toFixed(1);
-		out.push(`<text x="${x0 + w}" y="${oy}" font-size="16" text-anchor="end" dominant-baseline="middle">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
+		out.push(`<text x="${x0 + w}" y="${noteY}" font-size="16" text-anchor="end" dominant-baseline="middle">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
 	}
+	// labels that fit in one 32-byte word (short string: 31 bytes + length)
+	const total = counts.reduce((a, b) => a + b, 0) + over;
+	const word = counts.slice(0, WORD + 1).reduce((a, b) => a + b, 0);
+	const wx = (x0 + WORD * barW).toFixed(1);
+	out.push(`<line x1="${wx}" x2="${wx}" y1="${y0}" y2="${base}" stroke="${INK}" stroke-width="1.5" stroke-dasharray="6 4"/>`);
+	out.push(`<text x="${(x0 + WORD * barW + 8).toFixed(1)}" y="${noteY}" font-size="16" dominant-baseline="middle"><tspan font-weight="bold">${((100 * word) / total).toFixed(2)}%</tspan> ≤ ${WORD} bytes (1 word)</text>`);
 	values.forEach((n, i) => {
 		if (!n) return;
 		const by = y(n);
