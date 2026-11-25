@@ -104,7 +104,7 @@ type Box = { x: number; y: number; w: number; h: number };
 
 // single-color bars of labels by UTF-8 byte length, 1 to bytes.max, log scale
 function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
-	const P = { top: 52, right: 24, bottom: 44, left: 64 };
+	const P = { top: 40, right: 24, bottom: 44, left: 64 };
 	const x0 = box.x + P.left;
 	const y0 = box.y + P.top;
 	const w = box.w - P.left - P.right;
@@ -139,7 +139,6 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		out.push(`<text x="${tx}" y="${base + 26}" font-size="16" text-anchor="middle">${b}</text>`);
 	}
 	out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`);
-	out.push(`<text x="${box.x + 20}" y="${box.y + 28}" font-size="16" font-weight="bold">Bytes <tspan font-weight="normal">(log)</tspan></text>`);
 	out.push(`</g>`);
 	return out.join("\n");
 }
