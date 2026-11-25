@@ -104,7 +104,7 @@ type Box = { x: number; y: number; w: number; h: number };
 
 // single-color bars of labels by UTF-8 byte length, 1 to bytes.max, log scale
 function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
-	const P = { top: 40, right: 24, bottom: 44, left: 64 };
+	const P = { top: 20, right: 24, bottom: 44, left: 64 };
 	const x0 = box.x + P.left;
 	const y0 = box.y + P.top;
 	const w = box.w - P.left - P.right;
@@ -120,13 +120,15 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		`<g>`,
 		`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="12" fill="${WASH}"/>`,
 	];
-	if (over) {
-		out.push(`<text x="${box.x + box.w - 20}" y="${box.y + 28}" font-size="16" text-anchor="end">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
-	}
 	for (let d = 0; d <= decades; d++) {
 		const gy = y(10 ** d).toFixed(1);
 		out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${gy}" y2="${gy}" stroke="${GRID}" stroke-dasharray="4 4"/>`);
 		out.push(`<text x="${x0 - 8}" y="${gy}" font-size="16" text-anchor="end" dominant-baseline="middle">${formatCount(10 ** d)}</text>`);
+	}
+	if (over) {
+		// between the top two grid lines, above the short tail bars
+		const oy = y(10 ** (decades - 0.5)).toFixed(1);
+		out.push(`<text x="${x0 + w}" y="${oy}" font-size="16" text-anchor="end" dominant-baseline="middle">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
 	}
 	values.forEach((n, i) => {
 		if (!n) return;
