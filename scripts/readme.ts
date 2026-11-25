@@ -6,20 +6,11 @@ import { parseArgs } from "node:util";
 import { DB_FILE, LABEL_STORE, LABELS_FILE, README_FILE } from "../src/config.ts";
 import { countLabels, getMeta, openDB } from "../src/db.ts";
 import { labelhash, toHex } from "../src/hash.ts";
-import { lengthTally, longestLabels, percent, parseLabels } from "../src/stats.ts";
+import { longestLabels, parseLabels } from "../src/stats.ts";
 
 parseArgs({ options: {} }); // no options, rejects stray args
 
 const fmt = new Intl.NumberFormat("en-US");
-
-function lengthTable(tally: number[]) {
-	const total = tally.reduce((a, b) => a + b, 0);
-	return [
-		`| N | # | % |`,
-		`| ---: | ---: | ---: |`,
-		...tally.map((n, i) => `| ${i}${i === tally.length - 1 ? "+" : ""} | ${n} | ${percent(n, total)} |`),
-	].join("\n");
-}
 
 function longestTable(labels: string[]) {
 	return [
@@ -50,19 +41,13 @@ const labels = parseLabels(data);
 const state = indexState();
 
 const size = `${(data.length / (1 << 20)).toFixed(1)}MB`;
-const sha256 = new Bun.CryptoHasher("sha256").update(data).digest("hex");
 const date = new Date(state?.timestamp ? state.timestamp * 1000 : Date.now()).toJSON().split("T")[0];
 const source = state
-	? `ENS contract events, primary name records, and the [ENSv2 LabelStore](https://etherscan.io/address/${LABEL_STORE}) (\`${fmt.format(state.store)}\` labels through block [\`${state.block}\`](https://etherscan.io/block/${state.block}))`
+	? `ENS contract events, primary name records, and the [LabelStore](https://etherscan.io/address/${LABEL_STORE}) (\`${fmt.format(state.store)}\` labels through block [\`${state.block}\`](https://etherscan.io/block/${state.block}))`
 	: `ENS contract events and primary name records`;
 
 const vars: Record<string, string> = {
-	summary: `
-\`${fmt.format(labels.length)}\` unique, stop-free labels as of \`${date}\` collected from ${source}.
-
-* [\`${size}\`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>\`${sha256}\` (SHA256)
-`.trim(),
-	table: lengthTable(lengthTally(labels)),
+	summary: `\`${fmt.format(labels.length)}\` unique, stop-free [labels.json](https://github.com/adraffy/ens-labels/raw/master/labels.json) (${size}) as of \`${date}\` collected from ${source}.`,
 	longest: longestTable(longestLabels(labels)),
 };
 

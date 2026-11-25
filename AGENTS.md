@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from the legacy collection (ENS contract events and primary names) plus `Label` events indexed from the ENSv2 LabelStore. The demo lives at [raffy.xyz/ens/labels.html](https://raffy.xyz/ens/labels.html), not in this repo.
+Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from the legacy collection (ENS contract events and primary names) plus `Label` events indexed from the LabelStore. The demo lives at [raffy.xyz/ens/labels.html](https://raffy.xyz/ens/labels.html), not in this repo.
 
 ## Stack
 
@@ -13,17 +13,17 @@ Unique ENS labels, published as [`labels.json`](./labels.json). Labels come from
 
 - `src/` is library code: config, database, RPC client, hashing, sorting, stats, chart rendering.
 - `scripts/` holds one CLI entrypoint per `package.json` script, each parsing args with `parseArgs`.
-- `plot.svg` and parts of `README.md` are generated (see below).
+- `distribution.json`, `plot.svg`, and parts of `README.md` are generated (see below).
 
 ## Commands
 
 ```sh
 bun i
 bun run check    # tsc --noEmit, run after any TypeScript change
-bun run update   # index → labels → chart → readme
+bun run update   # index → labels → distribution → chart → readme
 ```
 
-Other scripts: `index [--to <block>]`, `labels`, `chart`, `readme`, `merge [file.json…] [-l <label>…]`, `invert <hash> | -n <namehash> [-p <parent>]`, `lowest [-n 10]`.
+Other scripts: `index [--to <block>]`, `labels`, `distribution`, `chart`, `readme`, `merge [file.json…] [-l <label>…]`, `invert <hash> | -n <namehash> [-p <parent>]`, `lowest [-n 10]`.
 
 ## Data
 
@@ -46,5 +46,6 @@ Other scripts: `index [--to <block>]`, `labels`, `chart`, `readme`, `merge [file
 
 ## Generated content
 
-- `bun run readme` replaces the `<!-- key -->…<!-- /key -->` sections in `README.md` (`summary`, `table`, `longest`). Edit around the markers, not inside them.
-- `plot.svg` comes from `bun run chart`. Don't edit it by hand.
+- `bun run readme` replaces the `<!-- key -->…<!-- /key -->` sections in `README.md` (`summary`, `longest`). Edit around the markers, not inside them.
+- `distribution.json` comes from `bun run distribution`: `{ total, codepoints, bytes }`, counts keyed by length.
+- `plot.svg` comes from `bun run chart`: the codepoint length distribution, with an inset of UTF-8 byte lengths 1–255. Don't edit either by hand.

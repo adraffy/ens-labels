@@ -1,4 +1,7 @@
-// render a label length distribution (see lengthTally) as an SVG bar chart
+// render the label length distribution (see lengthTally) as an SVG bar chart,
+// with an inset of the UTF-8 byte length distribution (see byteTally)
+
+import type { ByteTally } from "./stats.ts";
 
 const W = 1600;
 const H = 1000;
@@ -7,6 +10,7 @@ const FONT = `system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif
 const INK = "#888";
 const WASH = "rgba(136,136,136,0.15)";
 const GRID = "rgba(136,136,136,0.3)";
+const INSET = "#3889ff";
 
 function niceStep(max: number, ticks = 10) {
 	const raw = max / ticks;
@@ -44,7 +48,7 @@ function pill(text: string, x: number, y: number, size: number, extra = "") {
 	].join("");
 }
 
-export function renderChart(tally: number[]) {
+export function renderChart(tally: number[], bytes: ByteTally) {
 	const total = tally.reduce((a, b) => a + b, 0);
 	const max = Math.max(...tally);
 	const step = niceStep(max);
@@ -77,6 +81,14 @@ export function renderChart(tally: number[]) {
 		out.push(pill(formatPercent(n, total), cx - 7, py, 18, `transform="rotate(-90 ${cx.toFixed(1)} ${py.toFixed(1)}) translate(0 7)"`));
 	});
 
+	// inset in the top-right quarter, above the short bars
+	out.push(renderInset(bytes, total, {
+		x: M.left + plotW / 2 + 20,
+		y: M.top,
+		w: plotW / 2 - 30,
+		h: plotH / 2 - 20,
+	}));
+
 	// axes
 	const base = M.top + plotH;
 	out.push(`<line x1="${M.left}" x2="${W - M.right}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="2"/>`);
@@ -85,5 +97,49 @@ export function renderChart(tally: number[]) {
 	out.push(pill("Labels", M.left - 85, M.top - 50, 24, `font-weight="bold"`));
 
 	out.push(`</svg>`);
+	return out.join("\n");
+}
+
+type Box = { x: number; y: number; w: number; h: number };
+
+// single-color bars of labels by UTF-8 byte length, 1 to bytes.max
+function renderInset({ counts, max: maxBytes, over }: ByteTally, total: number, box: Box) {
+	const P = { top: 56, right: 24, bottom: 44, left: 64 };
+	const x0 = box.x + P.left;
+	const y0 = box.y + P.top;
+	const w = box.w - P.left - P.right;
+	const h = box.h - P.top - P.bottom;
+	const pcts = counts.slice(1, maxBytes + 1).map((n) => (100 * n) / total);
+	const step = niceStep(Math.max(...pcts), 4);
+	const top = Math.ceil(Math.max(...pcts) / step) * step;
+	const barW = w / maxBytes;
+	const y = (p: number) => y0 + h * (1 - p / top);
+	const base = y0 + h;
+
+	const out = [
+		`<g>`,
+		`<rect x="${box.x}" y="${box.y}" width="${box.w}" height="${box.h}" rx="12" fill="${WASH}"/>`,
+		`<text x="${box.x + 20}" y="${box.y + 36}" font-size="22" font-weight="bold">UTF-8 Bytes</text>`,
+	];
+	if (over) {
+		out.push(`<text x="${box.x + box.w - 20}" y="${box.y + 36}" font-size="18" text-anchor="end">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
+	}
+	for (let p = step; p <= top + 1e-9; p += step) {
+		const gy = y(p).toFixed(1);
+		out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${gy}" y2="${gy}" stroke="${GRID}" stroke-dasharray="4 4"/>`);
+		out.push(`<text x="${x0 - 8}" y="${gy}" font-size="16" text-anchor="end" dominant-baseline="middle">${+p.toFixed(6)}%</text>`);
+	}
+	pcts.forEach((p, i) => {
+		if (!p) return;
+		const by = y(p);
+		out.push(`<rect x="${(x0 + i * barW).toFixed(2)}" y="${by.toFixed(1)}" width="${barW.toFixed(2)}" height="${(base - by).toFixed(1)}" fill="${INSET}"/>`);
+	});
+	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
+		const tx = (x0 + (b - 0.5) * barW).toFixed(1);
+		out.push(`<line x1="${tx}" x2="${tx}" y1="${base}" y2="${base + 6}" stroke="${INK}"/>`);
+		out.push(`<text x="${tx}" y="${base + 26}" font-size="16" text-anchor="middle">${b}</text>`);
+	}
+	out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`);
+	out.push(`</g>`);
 	return out.join("\n");
 }

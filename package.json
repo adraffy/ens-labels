@@ -11,9 +11,10 @@
 		"merge": "bun scripts/merge.ts",
 		"index": "bun scripts/index.ts",
 		"labels": "bun scripts/labels.ts",
+		"distribution": "bun scripts/distribution.ts",
 		"chart": "bun scripts/chart.ts",
 		"readme": "bun scripts/readme.ts",
-		"update": "bun run index && bun run labels && bun run chart && bun run readme",
+		"update": "bun run index && bun run labels && bun run distribution && bun run chart && bun run readme",
 		"invert": "bun scripts/invert.ts",
 		"lowest": "bun scripts/lowest.ts",
 		"check": "tsc --noEmit"

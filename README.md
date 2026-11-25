@@ -1,9 +1,7 @@
 # ens-labels
 
 <!-- summary -->
-`3,428,945` unique, stop-free labels as of `2026-11-25` collected from ENS contract events, primary name records, and the [ENSv2 LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,783` labels through block [`26494988`](https://etherscan.io/block/26494988)).
-
-* [`49.3MB`](https://github.com/adraffy/ens-labels/raw/master/labels.json) — [labels.json](./labels.json)<br>`060b66a1b2f13512989a0db7104f41d7453a62be9909df837448fcabd24c554e` (SHA256)
+`3,428,945` unique, stop-free [labels.json](https://github.com/adraffy/ens-labels/raw/master/labels.json) (49.3MB) as of `2026-11-25` collected from ENS contract events, primary name records, and the [LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,784` labels through block [`26495340`](https://etherscan.io/block/26495340)).
 <!-- /summary -->
 
 [**Demo**](https://raffy.xyz/ens/labels.html) ⭐
@@ -12,61 +10,24 @@
 
 ## Usage
 
-Requires [Bun](https://bun.sh). Labels are kept in a local SQLite database (`labels.db`, not committed). A fresh database starts from `labels.json`, then indexes `Label` events from the [ENSv2 LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) using a public RPC (set `RPC_URL` to use your own).
+Labels are kept in a local SQLite database (`labels.db`, not committed). A fresh database starts from `labels.json`, then indexes `Label` events from the [LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) using a public RPC (set `RPC_URL` to use your own).
 
 ```sh
 bun i
-bun run update   # index → labels → chart → readme
+bun run update   # index → labels → distribution → chart → readme
 ```
 
 | Script | |
 | :--- | :--- |
 | `bun run index [--to <block>]` | Resume indexing LabelStore events up to the finalized block.<br>Each range commits atomically: <kbd>^C</kbd> once to stop after the current range, twice to quit now. |
 | `bun run labels` | Write `labels.json` from the database (stop-free, valid UTF-8, sorted). |
+| `bun run distribution` | Write [`distribution.json`](./distribution.json): label counts by codepoint length and UTF-8 byte length. |
 | `bun run chart [--max 30]` | Write `plot.svg` from `labels.json`. |
 | `bun run readme` | Update the stats in `README.md`. |
 | `bun run merge [file.json…] [-l <label>…]` | Merge labels or names (split on `.`) into the database. |
 | `bun run invert <labelhash \| tokenId>` | Find the label of a labelhash or ENSv2 id (version bits ignored).<br>Falls back to `LabelStore.getLabel()` on-chain. |
 | `bun run invert -n <namehash> [-p <parent>]` | Find the label of `<label>.<parent>` from its namehash. |
 | `bun run lowest [-n 10]` | Known labels with the smallest labelhashes. |
-
-## Length Distribution
-
-<!-- table -->
-| N | # | % |
-| ---: | ---: | ---: |
-| 0 | 1 | 0.0000% |
-| 1 | 75 | 0.0022% |
-| 2 | 407 | 0.0119% |
-| 3 | 50177 | 1.4633% |
-| 4 | 113926 | 3.3225% |
-| 5 | 482736 | 14.0783% |
-| 6 | 465251 | 13.5683% |
-| 7 | 397505 | 11.5926% |
-| 8 | 405955 | 11.8391% |
-| 9 | 320441 | 9.3452% |
-| 10 | 297960 | 8.6896% |
-| 11 | 227553 | 6.6362% |
-| 12 | 182920 | 5.3346% |
-| 13 | 134228 | 3.9146% |
-| 14 | 100745 | 2.9381% |
-| 15 | 73059 | 2.1307% |
-| 16 | 49256 | 1.4365% |
-| 17 | 33949 | 0.9901% |
-| 18 | 24262 | 0.7076% |
-| 19 | 16923 | 0.4935% |
-| 20 | 12506 | 0.3647% |
-| 21 | 8602 | 0.2509% |
-| 22 | 5816 | 0.1696% |
-| 23 | 4338 | 0.1265% |
-| 24 | 3370 | 0.0983% |
-| 25 | 2240 | 0.0653% |
-| 26 | 1671 | 0.0487% |
-| 27 | 1438 | 0.0419% |
-| 28 | 1262 | 0.0368% |
-| 29 | 777 | 0.0227% |
-| 30+ | 9596 | 0.2799% |
-<!-- /table -->
 
 ## Longest Labels
 
