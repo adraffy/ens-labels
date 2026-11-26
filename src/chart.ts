@@ -89,8 +89,7 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	}
 
 	// total, in the empty top-left corner
-	out.push(`<text x="${M.right}" y="${M.right + 40}" font-size="44" font-weight="bold">${total.toLocaleString("en-US")}</text>`);
-	out.push(`<text x="${M.right}" y="${M.right + 72}" font-size="22">labels</text>`);
+	out.push(pill(`${total.toLocaleString("en-US")} Labels`, M.right + 6, M.right + 30, 26, `font-weight="bold"`));
 
 	// bars
 	tally.forEach((n, i) => {
@@ -155,14 +154,9 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 	if (over) {
 		out.push(`<text x="${x0 + w}" y="${noteY}" font-size="16" text-anchor="end" dominant-baseline="middle">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
 	}
-	// labels that fit in one 32-byte word (short string: 31 bytes + length)
-	// labels that fit in one 32-byte word (short string: 31 bytes + length)
-	const total = counts.reduce((a, b) => a + b, 0) + over;
-	const word = counts.slice(0, WORD + 1).reduce((a, b) => a + b, 0);
-	out.push(`<text x="${(x0 + WORD * barW + 8).toFixed(1)}" y="${noteY}" font-size="16" dominant-baseline="middle"><tspan font-weight="bold">${((100 * word) / total).toFixed(2)}%</tspan> ≤ ${WORD} bytes (1 word)</text>`);
-
 	// bars (byte length i + 1), colored by storage words
 	const cx = (bytes: number) => x0 + (bytes - 0.5) * barW;
+	const top = (bytes: number) => y(Math.max(1, counts[bytes]!)) - 3;
 	values.forEach((n, i) => {
 		if (!n) return;
 		const by = y(n);
@@ -177,19 +171,20 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		const hi = Math.min(maxBytes, words === 1 ? WORD : 32 * (words - 1));
 		out.push(`<text x="${((cx(lo) + cx(hi)) / 2).toFixed(1)}" y="${base + 22}" font-size="18" font-weight="bold" text-anchor="middle" fill="${wordColor(words)}">${words}</text>`);
 	}
+	// share that fits in one 32-byte word (short string: 31 bytes + length),
+	// with an arrow down into the 1-word bars
+	const total = counts.reduce((a, b) => a + b, 0) + over;
+	const word = counts.slice(0, WORD + 1).reduce((a, b) => a + b, 0);
+	const noteX = x0 + WORD * barW + 8;
+	out.push(`<text x="${noteX.toFixed(1)}" y="${noteY}" font-size="16" dominant-baseline="middle" fill="${wordColor(1)}"><tspan font-weight="bold">${((100 * word) / total).toFixed(2)}%</tspan> ≤ ${WORD} bytes (1 word)</text>`);
+	out.push(arrow({ x: noteX - 2, y: +noteY + 8 }, { x: cx(24), y: top(24) }, wordColor(1)));
+
 	// 32 bytes is the only 2-word length: label it from the upper right,
 	// above the shorter 3-word bars, with an arrow to the top of its bar
-	const two = WORD + 1;
-	const tip = { x: cx(two) + 2, y: y(Math.max(1, counts[two]!)) - 3 };
-	const from = { x: tip.x + 26, y: tip.y - 30 };
-	const len = Math.hypot(tip.x - from.x, tip.y - from.y);
-	const [ux, uy] = [(tip.x - from.x) / len, (tip.y - from.y) / len];
-	const head = (side: number) => `${(tip.x - 10 * ux + side * 5 * uy).toFixed(1)} ${(tip.y - 10 * uy - side * 5 * ux).toFixed(1)}`;
-	out.push(`<g fill="${wordColor(2)}" stroke="${wordColor(2)}">`);
-	out.push(`<text x="${(from.x + 4).toFixed(1)}" y="${(from.y - 4).toFixed(1)}" font-size="18" font-weight="bold" stroke="none">2</text>`);
-	out.push(`<line x1="${from.x.toFixed(1)}" y1="${from.y.toFixed(1)}" x2="${(tip.x - 8 * ux).toFixed(1)}" y2="${(tip.y - 8 * uy).toFixed(1)}" stroke-width="2"/>`);
-	out.push(`<path d="M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${head(1)} L${head(-1)} z" stroke="none"/>`);
-	out.push(`</g>`);
+	const two = { x: cx(WORD + 1) + 2, y: top(WORD + 1) };
+	const from = { x: two.x + 26, y: two.y - 30 };
+	out.push(`<text x="${(from.x + 4).toFixed(1)}" y="${(from.y - 4).toFixed(1)}" font-size="18" font-weight="bold" fill="${wordColor(2)}">2</text>`);
+	out.push(arrow(from, two, wordColor(2)));
 
 	// byte ticks
 	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
@@ -205,4 +200,17 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 // bold pill centered on x
 function axisTitle(text: string, cx: number, y: number, size: number) {
 	return pill(text, cx - pillWidth(text, size) / 2 + 6, y, size, `font-weight="bold"`);
+}
+
+type Point = { x: number; y: number };
+
+// line from `from` with an arrowhead at `tip`
+function arrow(from: Point, tip: Point, color: string) {
+	const len = Math.hypot(tip.x - from.x, tip.y - from.y);
+	const [ux, uy] = [(tip.x - from.x) / len, (tip.y - from.y) / len];
+	const head = (side: number) => `${(tip.x - 10 * ux + side * 5 * uy).toFixed(1)} ${(tip.y - 10 * uy - side * 5 * ux).toFixed(1)}`;
+	return [
+		`<line x1="${from.x.toFixed(1)}" y1="${from.y.toFixed(1)}" x2="${(tip.x - 8 * ux).toFixed(1)}" y2="${(tip.y - 8 * uy).toFixed(1)}" stroke="${color}" stroke-width="2"/>`,
+		`<path d="M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${head(1)} L${head(-1)} z" fill="${color}"/>`,
+	].join("");
 }
