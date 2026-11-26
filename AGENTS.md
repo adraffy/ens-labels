@@ -48,4 +48,4 @@ Other scripts: `index [--to <block>]`, `labels`, `distribution`, `chart`, `readm
 
 - `bun run readme` replaces the `<!-- key -->…<!-- /key -->` sections in `README.md` (`summary`, `longest`). Edit around the markers, not inside them.
 - `distribution.json` comes from `bun run distribution`: `{ total, codepoints, bytes }`, counts keyed by length.
-- `plot.svg` comes from `bun run chart`: the total, the codepoint length distribution (1–31, 32+), and an inset of UTF-8 byte lengths 1–255 (log scale) colored by Solidity `string` storage words (≤ 31 bytes: 1, 32: 2, then 1 + ⌈n / 32⌉), with a 3 / 4 / 5+ words table. Don't edit either by hand.
+- `plot.svg` comes from `bun run chart`: the total, the codepoint length distribution (1–31, 32+), and an inset of UTF-8 byte lengths 1–255 (log scale) colored by Solidity `string` storage words (≤ 31 bytes: 1, 32: 2, then 1 + ⌈n / 32⌉), plus a table of labels with 3, 4, and 5+ codepoints. Don't edit either by hand.

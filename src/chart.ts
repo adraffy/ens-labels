@@ -115,6 +115,14 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 		h: inset.bottom - inset.y,
 	}));
 
+	// labels by codepoint tier (.eth pricing: 3, 4, 5+), boxed under the inset
+	const tiers: [string, number][] = [
+		["3", tally[3] ?? 0],
+		["4", tally[4] ?? 0],
+		["5+", tally.slice(5).reduce((a, b) => a + b, 0)],
+	];
+	out.push(renderTable(tiers, total, { x: W - M.right - 340, y: inset.bottom + 20, w: 340 }));
+
 	// axes
 	const base = M.top + plotH;
 	out.push(`<line x1="${M.left}" x2="${W - M.right}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="2"/>`);
@@ -191,26 +199,6 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 	out.push(arrow(from, two, wordColor(2)));
 	out.push(`<text x="${(from.x + 6).toFixed(1)}" y="${from.y.toFixed(1)}" font-size="18" font-weight="bold" fill="${wordColor(2)}" dominant-baseline="middle">2 words</text>`);
 
-	// table of the longer groups, under the over note, above the short tail bars
-	const groups = new Map<string, number>();
-	const groupOf = (words: number) => (words >= 5 ? "5+" : String(words));
-	counts.forEach((n, bytes) => {
-		const words = storageWords(bytes);
-		if (words >= 3) groups.set(groupOf(words), (groups.get(groupOf(words)) ?? 0) + n);
-	});
-	groups.set("5+", (groups.get("5+") ?? 0) + over);
-	const right = x0 + w;
-	["3", "4", "5+"].forEach((key, row) => {
-		const n = groups.get(key) ?? 0;
-		const ty = (+noteY + 30 + row * 24).toFixed(1);
-		const fill = key === "5+" ? INK : wordColor(+key);
-		out.push(`<g font-size="16" fill="${fill}">`);
-		out.push(`<text x="${right - 250}" y="${ty}" font-weight="bold">${key} words</text>`);
-		out.push(`<text x="${right - 80}" y="${ty}" text-anchor="end">${n.toLocaleString("en-US")}</text>`);
-		out.push(`<text x="${right}" y="${ty}" text-anchor="end">${formatPercent(n, total)}</text>`);
-		out.push(`</g>`);
-	});
-
 	// byte ticks
 	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
 		const tx = cx(b).toFixed(1);
@@ -238,4 +226,24 @@ function arrow(from: Point, tip: Point, color: string) {
 		`<line x1="${from.x.toFixed(1)}" y1="${from.y.toFixed(1)}" x2="${(tip.x - 8 * ux).toFixed(1)}" y2="${(tip.y - 8 * uy).toFixed(1)}" stroke="${color}" stroke-width="2"/>`,
 		`<path d="M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${head(1)} L${head(-1)} z" fill="${color}"/>`,
 	].join("");
+}
+
+// boxed table: codepoints, labels, share of total
+function renderTable(rows: [string, number][], total: number, { x, y, w }: { x: number; y: number; w: number }) {
+	const rowH = 32;
+	const h = 20 + rowH * (rows.length + 1);
+	const cols = [x + 24, x + w - 120, x + w - 24]; // left, right, right
+	const out = [`<g font-size="20">`, `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="12" fill="${WASH}"/>`];
+	const head = y + 10 + rowH * 0.7;
+	out.push(`<text x="${cols[0]}" y="${head}" font-size="16" font-weight="bold">Codepoints</text>`);
+	out.push(`<text x="${cols[1]}" y="${head}" font-size="16" font-weight="bold" text-anchor="end">Labels</text>`);
+	out.push(`<text x="${cols[2]}" y="${head}" font-size="16" font-weight="bold" text-anchor="end">%</text>`);
+	rows.forEach(([key, n], i) => {
+		const ty = head + rowH * (i + 1);
+		out.push(`<text x="${cols[0]}" y="${ty}" font-weight="bold">${key}</text>`);
+		out.push(`<text x="${cols[1]}" y="${ty}" text-anchor="end">${n.toLocaleString("en-US")}</text>`);
+		out.push(`<text x="${cols[2]}" y="${ty}" text-anchor="end">${formatPercent(n, total)}</text>`);
+	});
+	out.push(`</g>`);
+	return out.join("\n");
 }
