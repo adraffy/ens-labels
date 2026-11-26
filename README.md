@@ -1,7 +1,7 @@
 # ens-labels
 
 <!-- summary -->
-`3,428,945` unique, stop-free [labels.json](https://github.com/adraffy/ens-labels/raw/master/labels.json) (49.3MB) as of `2026-11-25` collected from ENS contract events, primary name records, and the [LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,784` labels through block [`26495340`](https://etherscan.io/block/26495340)).
+`3,428,962` unique, stop-free [labels.json](https://github.com/adraffy/ens-labels/raw/master/labels.json) (49.3MB) as of `2026-11-26` collected from ENS contract events, primary name records, and the [LabelStore](https://etherscan.io/address/0x31e5e081fe38d15b3e8214ba5cb08dc4708b70ba) (`923,823` labels through block [`26502038`](https://etherscan.io/block/26502038)).
 <!-- /summary -->
 
 [**Demo**](https://raffy.xyz/ens/labels.html) ⭐
@@ -22,7 +22,7 @@ bun run update   # index → labels → distribution → chart → readme
 | `bun run index [--to <block>]` | Resume indexing LabelStore events up to the finalized block.<br>Each range commits atomically: <kbd>^C</kbd> once to stop after the current range, twice to quit now. |
 | `bun run labels` | Write `labels.json` from the database (stop-free, valid UTF-8, sorted). |
 | `bun run distribution` | Write [`distribution.json`](./distribution.json): label counts by codepoint length and UTF-8 byte length. |
-| `bun run chart [--max 30]` | Write `plot.svg` from `labels.json`. |
+| `bun run chart [--max 32]` | Write `plot.svg` from `labels.json`. |
 | `bun run readme` | Update the stats in `README.md`. |
 | `bun run merge [file.json…] [-l <label>…]` | Merge labels or names (split on `.`) into the database. |
 | `bun run invert <labelhash \| tokenId>` | Find the label of a labelhash or ENSv2 id (version bits ignored).<br>Falls back to `LabelStore.getLabel()` on-chain. |
