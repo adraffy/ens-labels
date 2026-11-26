@@ -116,10 +116,12 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	}));
 
 	// labels by codepoint tier (.eth pricing: 3, 4, 5+), boxed under the inset
-	const tiers: [string, number][] = [
-		["3", tally[3] ?? 0],
-		["4", tally[4] ?? 0],
-		["5+", tally.slice(5).reduce((a, b) => a + b, 0)],
+	// rows colored like their bars (5+ like the 5 bar)
+	const barColor = (len: number) => rainbow((tally[len] ?? 0) / max);
+	const tiers: Row[] = [
+		["3", tally[3] ?? 0, barColor(3)],
+		["4", tally[4] ?? 0, barColor(4)],
+		["5+", tally.slice(5).reduce((a, b) => a + b, 0), barColor(5)],
 	];
 	out.push(renderTable(tiers, total, { x: W - M.right - 340, y: inset.bottom + 20, w: 340 }));
 
@@ -228,8 +230,10 @@ function arrow(from: Point, tip: Point, color: string) {
 	].join("");
 }
 
+type Row = [key: string, count: number, color: string];
+
 // boxed table: codepoints, labels, share of total
-function renderTable(rows: [string, number][], total: number, { x, y, w }: { x: number; y: number; w: number }) {
+function renderTable(rows: Row[], total: number, { x, y, w }: { x: number; y: number; w: number }) {
 	const rowH = 32;
 	const h = 20 + rowH * (rows.length + 1);
 	const cols = [x + 24, x + w - 120, x + w - 24]; // left, right, right
@@ -238,11 +242,13 @@ function renderTable(rows: [string, number][], total: number, { x, y, w }: { x: 
 	out.push(`<text x="${cols[0]}" y="${head}" font-size="16" font-weight="bold">Codepoints</text>`);
 	out.push(`<text x="${cols[1]}" y="${head}" font-size="16" font-weight="bold" text-anchor="end">Labels</text>`);
 	out.push(`<text x="${cols[2]}" y="${head}" font-size="16" font-weight="bold" text-anchor="end">%</text>`);
-	rows.forEach(([key, n], i) => {
+	rows.forEach(([key, n, color], i) => {
 		const ty = head + rowH * (i + 1);
+		out.push(`<g fill="${color}">`);
 		out.push(`<text x="${cols[0]}" y="${ty}" font-weight="bold">${key}</text>`);
 		out.push(`<text x="${cols[1]}" y="${ty}" text-anchor="end">${n.toLocaleString("en-US")}</text>`);
 		out.push(`<text x="${cols[2]}" y="${ty}" text-anchor="end">${formatPercent(n, total)}</text>`);
+		out.push(`</g>`);
 	});
 	out.push(`</g>`);
 	return out.join("\n");

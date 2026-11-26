@@ -407,15 +407,21 @@
 <text x="1254" y="572.4" font-size="16" font-weight="bold">Codepoints</text>
 <text x="1450" y="572.4" font-size="16" font-weight="bold" text-anchor="end">Labels</text>
 <text x="1546" y="572.4" font-size="16" font-weight="bold" text-anchor="end">%</text>
+<g fill="hsl(242 75% 55%)">
 <text x="1254" y="604.4" font-weight="bold">3</text>
 <text x="1450" y="604.4" text-anchor="end">50,177</text>
 <text x="1546" y="604.4" text-anchor="end">1.46%</text>
+</g>
+<g fill="hsl(206 75% 55%)">
 <text x="1254" y="636.4" font-weight="bold">4</text>
 <text x="1450" y="636.4" text-anchor="end">113,927</text>
 <text x="1546" y="636.4" text-anchor="end">3.32%</text>
+</g>
+<g fill="hsl(0 75% 55%)">
 <text x="1254" y="668.4" font-weight="bold">5+</text>
 <text x="1450" y="668.4" text-anchor="end">3,264,374</text>
 <text x="1546" y="668.4" text-anchor="end">95.20%</text>
+</g>
 </g>
 <line x1="100" x2="1570" y1="930" y2="930" stroke="#888" stroke-width="2"/>
 <line x1="100" x2="100" y1="120" y2="930" stroke="#888" stroke-width="2"/>
