@@ -1,5 +1,5 @@
 // render the label length distribution of labels.json as plot.svg
-// usage: bun run chart [--max 30]
+// usage: bun run chart [--max 32]
 
 import { parseArgs } from "node:util";
 import { CHART_FILE } from "../src/config.ts";
@@ -8,7 +8,7 @@ import { byteTally, lengthTally, readLabels } from "../src/stats.ts";
 
 const { values } = parseArgs({
 	options: {
-		max: { type: "string", default: "30" },
+		max: { type: "string", default: "32" },
 		out: { type: "string", short: "o", default: CHART_FILE.pathname },
 	},
 });

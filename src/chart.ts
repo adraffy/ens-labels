@@ -1,5 +1,6 @@
 // render the label length distribution (see lengthTally) as an SVG bar chart,
 // with an inset of the UTF-8 byte length distribution (see byteTally)
+// colored by how many storage words each length takes as a Solidity string
 
 import type { ByteTally } from "./stats.ts";
 
@@ -10,7 +11,6 @@ const FONT = `system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif
 const INK = "#888";
 const WASH = "rgba(136,136,136,0.15)";
 const GRID = "rgba(136,136,136,0.3)";
-const INSET = "#3889ff";
 const WORD = 31; // max bytes of a string that fits in one storage word
 
 function niceStep(max: number, ticks = 10) {
@@ -26,6 +26,18 @@ function formatCount(n: number) {
 function formatPercent(n: number, total: number) {
 	const p = (100 * n) / total;
 	return `${p >= 1 ? p.toFixed(2) : p.toPrecision(2)}%`;
+}
+
+// storage words of a Solidity string of n bytes:
+// short (≤ 31) is 1 word, long is 1 length word + ⌈n / 32⌉ data words
+function storageWords(n: number) {
+	return n <= WORD ? 1 : 1 + Math.ceil(n / 32);
+}
+
+// a color per word count; 2 (exactly 32 bytes) stands out
+const WORD_COLORS = ["#3889ff", "#ff3b30", "#a855f7", "#ec4899", "#f97316", "#eab308", "#84cc16", "#22c55e", "#14b8a6"];
+function wordColor(words: number) {
+	return WORD_COLORS[(words - 1) % WORD_COLORS.length]!;
 }
 
 // purple → blue → green → yellow → red
@@ -53,14 +65,16 @@ function pill(text: string, x: number, y: number, size: number, extra = "") {
 	].join("");
 }
 
+// tally[0] (the empty label) counts toward the total but isn't drawn
 export function renderChart(tally: number[], bytes: ByteTally) {
 	const total = tally.reduce((a, b) => a + b, 0);
-	const max = Math.max(...tally);
+	const lengths = tally.length - 1; // 1 to max+
+	const max = Math.max(...tally.slice(1));
 	const step = niceStep(max);
 	const top = Math.ceil(max / step) * step;
 	const plotW = W - M.left - M.right;
 	const plotH = H - M.top - M.bottom;
-	const barW = plotW / tally.length;
+	const barW = plotW / lengths;
 	const y = (n: number) => M.top + plotH * (1 - n / top);
 
 	const out: string[] = [
@@ -74,9 +88,14 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 		out.push(`<text x="${M.left - 10}" y="${gy}" font-size="22" text-anchor="end" dominant-baseline="middle">${formatCount(n)}</text>`);
 	}
 
+	// total, in the empty top-left corner
+	out.push(`<text x="${M.right}" y="${M.right + 40}" font-size="44" font-weight="bold">${total.toLocaleString("en-US")}</text>`);
+	out.push(`<text x="${M.right}" y="${M.right + 72}" font-size="22">labels</text>`);
+
 	// bars
 	tally.forEach((n, i) => {
-		const x = M.left + i * barW;
+		if (!i) return;
+		const x = M.left + (i - 1) * barW;
 		const cx = x + barW / 2;
 		const by = y(n);
 		const label = i === tally.length - 1 ? `${i}+` : String(i);
@@ -108,9 +127,9 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 
 type Box = { x: number; y: number; w: number; h: number };
 
-// single-color bars of labels by UTF-8 byte length, 1 to bytes.max, log scale
+// bars of labels by UTF-8 byte length, 1 to bytes.max, log scale, colored by storage words
 function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
-	const P = { top: 20, right: 24, bottom: 72, left: 64 };
+	const P = { top: 20, right: 24, bottom: 96, left: 64 };
 	const x0 = box.x + P.left;
 	const y0 = box.y + P.top;
 	const w = box.w - P.left - P.right;
@@ -137,23 +156,48 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		out.push(`<text x="${x0 + w}" y="${noteY}" font-size="16" text-anchor="end" dominant-baseline="middle">+${over.toLocaleString("en-US")} over ${maxBytes}</text>`);
 	}
 	// labels that fit in one 32-byte word (short string: 31 bytes + length)
+	// labels that fit in one 32-byte word (short string: 31 bytes + length)
 	const total = counts.reduce((a, b) => a + b, 0) + over;
 	const word = counts.slice(0, WORD + 1).reduce((a, b) => a + b, 0);
-	const wx = (x0 + WORD * barW).toFixed(1);
-	out.push(`<line x1="${wx}" x2="${wx}" y1="${y0}" y2="${base}" stroke="${INK}" stroke-width="1.5" stroke-dasharray="6 4"/>`);
 	out.push(`<text x="${(x0 + WORD * barW + 8).toFixed(1)}" y="${noteY}" font-size="16" dominant-baseline="middle"><tspan font-weight="bold">${((100 * word) / total).toFixed(2)}%</tspan> ≤ ${WORD} bytes (1 word)</text>`);
+
+	// bars (byte length i + 1), colored by storage words
+	const cx = (bytes: number) => x0 + (bytes - 0.5) * barW;
 	values.forEach((n, i) => {
 		if (!n) return;
 		const by = y(n);
-		out.push(`<rect x="${(x0 + i * barW).toFixed(2)}" y="${by.toFixed(1)}" width="${barW.toFixed(2)}" height="${(base - by).toFixed(1)}" fill="${INSET}"/>`);
+		out.push(`<rect x="${(x0 + i * barW).toFixed(2)}" y="${by.toFixed(1)}" width="${barW.toFixed(2)}" height="${(base - by).toFixed(1)}" fill="${wordColor(storageWords(i + 1))}"/>`);
 	});
-	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
-		const tx = (x0 + (b - 0.5) * barW).toFixed(1);
-		out.push(`<line x1="${tx}" x2="${tx}" y1="${base}" y2="${base + 6}" stroke="${INK}"/>`);
-		out.push(`<text x="${tx}" y="${base + 26}" font-size="16" text-anchor="middle">${b}</text>`);
-	}
 	out.push(`<line x1="${x0}" x2="${x0 + w}" y1="${base}" y2="${base}" stroke="${INK}" stroke-width="1.5"/>`);
-	out.push(axisTitle("Bytes", x0 + w / 2, base + 56, 18));
+
+	// word count of each group, centered under its bytes
+	for (let words = 1; storageWords(maxBytes) >= words; words++) {
+		if (words === 2) continue; // a single length, marked with an arrow below
+		const lo = words === 1 ? 1 : 32 * (words - 2) + 1;
+		const hi = Math.min(maxBytes, words === 1 ? WORD : 32 * (words - 1));
+		out.push(`<text x="${((cx(lo) + cx(hi)) / 2).toFixed(1)}" y="${base + 22}" font-size="18" font-weight="bold" text-anchor="middle" fill="${wordColor(words)}">${words}</text>`);
+	}
+	// 32 bytes is the only 2-word length: label it from the upper right,
+	// above the shorter 3-word bars, with an arrow to the top of its bar
+	const two = WORD + 1;
+	const tip = { x: cx(two) + 2, y: y(Math.max(1, counts[two]!)) - 3 };
+	const from = { x: tip.x + 26, y: tip.y - 30 };
+	const len = Math.hypot(tip.x - from.x, tip.y - from.y);
+	const [ux, uy] = [(tip.x - from.x) / len, (tip.y - from.y) / len];
+	const head = (side: number) => `${(tip.x - 10 * ux + side * 5 * uy).toFixed(1)} ${(tip.y - 10 * uy - side * 5 * ux).toFixed(1)}`;
+	out.push(`<g fill="${wordColor(2)}" stroke="${wordColor(2)}">`);
+	out.push(`<text x="${(from.x + 4).toFixed(1)}" y="${(from.y - 4).toFixed(1)}" font-size="18" font-weight="bold" stroke="none">2</text>`);
+	out.push(`<line x1="${from.x.toFixed(1)}" y1="${from.y.toFixed(1)}" x2="${(tip.x - 8 * ux).toFixed(1)}" y2="${(tip.y - 8 * uy).toFixed(1)}" stroke-width="2"/>`);
+	out.push(`<path d="M${tip.x.toFixed(1)} ${tip.y.toFixed(1)} L${head(1)} L${head(-1)} z" stroke="none"/>`);
+	out.push(`</g>`);
+
+	// byte ticks
+	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
+		const tx = cx(b).toFixed(1);
+		out.push(`<line x1="${tx}" x2="${tx}" y1="${base}" y2="${base + 4}" stroke="${INK}"/>`);
+		out.push(`<text x="${tx}" y="${base + 46}" font-size="16" text-anchor="middle">${b}</text>`);
+	}
+	out.push(axisTitle("Bytes", x0 + w / 2, base + 80, 18));
 	out.push(`</g>`);
 	return out.join("\n");
 }
