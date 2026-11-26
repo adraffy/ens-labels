@@ -89,7 +89,8 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	}
 
 	// total, in the empty top-left corner
-	out.push(pill(`${total.toLocaleString("en-US")} Labels`, M.right + 6, M.right + 30, 26, `font-weight="bold"`));
+	out.push(`<text x="${M.right}" y="${M.right + 40}" font-size="44" font-weight="bold">${total.toLocaleString("en-US")}</text>`);
+	out.push(pill("Labels", M.right + 6, M.right + 76, 24, `font-weight="bold"`));
 
 	// bars
 	tally.forEach((n, i) => {
@@ -171,20 +172,24 @@ function renderInset({ counts, max: maxBytes, over }: ByteTally, box: Box) {
 		const hi = Math.min(maxBytes, words === 1 ? WORD : 32 * (words - 1));
 		out.push(`<text x="${((cx(lo) + cx(hi)) / 2).toFixed(1)}" y="${base + 22}" font-size="18" font-weight="bold" text-anchor="middle" fill="${wordColor(words)}">${words}</text>`);
 	}
-	// share that fits in one 32-byte word (short string: 31 bytes + length),
-	// with an arrow down into the 1-word bars
+	// 1 word (short string: up to 31 bytes + length): a level arrow pointing
+	// back at the edge of the group, with its share of all labels
 	const total = counts.reduce((a, b) => a + b, 0) + over;
 	const word = counts.slice(0, WORD + 1).reduce((a, b) => a + b, 0);
-	const noteX = x0 + WORD * barW + 8;
-	out.push(`<text x="${noteX.toFixed(1)}" y="${noteY}" font-size="16" dominant-baseline="middle" fill="${wordColor(1)}"><tspan font-weight="bold">${((100 * word) / total).toFixed(2)}%</tspan> ≤ ${WORD} bytes (1 word)</text>`);
-	out.push(arrow({ x: noteX - 2, y: +noteY + 8 }, { x: cx(24), y: top(24) }, wordColor(1)));
+	const level = 10 ** (decades - 1);
+	let edge = 1;
+	for (let b = 1; b <= WORD; b++) if (counts[b]! >= level) edge = b;
+	const one = { x: x0 + edge * barW + 3, y: y(level) };
+	const tail = { x: x0 + (WORD + 6) * barW, y: one.y };
+	out.push(arrow(tail, one, wordColor(1)));
+	out.push(`<text x="${(tail.x + 6).toFixed(1)}" y="${one.y.toFixed(1)}" font-size="18" fill="${wordColor(1)}" dominant-baseline="middle"><tspan font-weight="bold">1 word</tspan><tspan x="${(tail.x + 6).toFixed(1)}" dy="22" font-size="16">(${((100 * word) / total).toFixed(2)}%)</tspan></text>`);
 
-	// 32 bytes is the only 2-word length: label it from the upper right,
+	// 32 bytes is the only 2-word length: label it from the right,
 	// above the shorter 3-word bars, with an arrow to the top of its bar
 	const two = { x: cx(WORD + 1) + 2, y: top(WORD + 1) };
-	const from = { x: two.x + 26, y: two.y - 30 };
-	out.push(`<text x="${(from.x + 4).toFixed(1)}" y="${(from.y - 4).toFixed(1)}" font-size="18" font-weight="bold" fill="${wordColor(2)}">2</text>`);
+	const from = { x: two.x + 36, y: two.y - 18 };
 	out.push(arrow(from, two, wordColor(2)));
+	out.push(`<text x="${(from.x + 6).toFixed(1)}" y="${from.y.toFixed(1)}" font-size="18" font-weight="bold" fill="${wordColor(2)}" dominant-baseline="middle">2 words</text>`);
 
 	// byte ticks
 	for (const b of [1, 32, 64, 96, 128, 160, 192, 224, maxBytes]) {
