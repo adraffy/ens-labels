@@ -40,9 +40,12 @@ function wordColor(words: number) {
 	return WORD_COLORS[(words - 1) % WORD_COLORS.length]!;
 }
 
-// purple → blue → green → yellow → red
-function rainbow(t: number) {
-	return `hsl(${Math.round(270 * (1 - t))} 75% 55%)`;
+// .eth pricing tiers by codepoint length: 3 gold, 4 silver, 5+ bronze
+const GOLD = "#d4a017";
+const SILVER = "#9ea3ab";
+const BRONZE = "#c06a2b";
+function tierColor(length: number) {
+	return length >= 5 ? BRONZE : length === 4 ? SILVER : length === 3 ? GOLD : INK;
 }
 
 function escape(s: string) {
@@ -99,7 +102,7 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 		const cx = x + barW / 2;
 		const by = y(n);
 		const label = i === tally.length - 1 ? `${i}+` : String(i);
-		out.push(`<rect x="${x.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${(M.top + plotH - by).toFixed(1)}" fill="${rainbow(n / max)}"/>`);
+		out.push(`<rect x="${(x + 1).toFixed(1)}" y="${by.toFixed(1)}" width="${(barW - 2).toFixed(1)}" height="${(M.top + plotH - by).toFixed(1)}" fill="${tierColor(i)}"/>`);
 		out.push(`<text x="${cx.toFixed(1)}" y="${(by - 10).toFixed(1)}" font-size="${label.length > 2 ? 22 : 26}" font-weight="bold" text-anchor="middle">${label}</text>`);
 		const py = by - 44;
 		out.push(pill(formatPercent(n, total), cx - 7, py, 18, `transform="rotate(-90 ${cx.toFixed(1)} ${py.toFixed(1)}) translate(0 7)"`));
@@ -116,12 +119,11 @@ export function renderChart(tally: number[], bytes: ByteTally) {
 	}));
 
 	// labels by codepoint tier (.eth pricing: 3, 4, 5+), boxed under the inset
-	// rows colored like their bars (5+ like the 5 bar)
-	const barColor = (len: number) => rainbow((tally[len] ?? 0) / max);
+	// rows colored like their bars
 	const tiers: Row[] = [
-		["3", tally[3] ?? 0, barColor(3)],
-		["4", tally[4] ?? 0, barColor(4)],
-		["5+", tally.slice(5).reduce((a, b) => a + b, 0), barColor(5)],
+		["3", tally[3] ?? 0, GOLD],
+		["4", tally[4] ?? 0, SILVER],
+		["5+", tally.slice(5).reduce((a, b) => a + b, 0), BRONZE],
 	];
 	out.push(renderTable(tiers, total, { x: W - M.right - 340, y: inset.bottom + 20, w: 340 }));
 
@@ -245,7 +247,8 @@ function renderTable(rows: Row[], total: number, { x, y, w }: { x: number; y: nu
 	rows.forEach(([key, n, color], i) => {
 		const ty = head + rowH * (i + 1);
 		out.push(`<g fill="${color}">`);
-		out.push(`<text x="${cols[0]}" y="${ty}" font-weight="bold">${key}</text>`);
+		out.push(`<circle cx="${cols[0]! + 7}" cy="${ty - 7}" r="8" stroke="rgba(0,0,0,0.25)" stroke-width="1.5"/>`);
+		out.push(`<text x="${cols[0]! + 24}" y="${ty}" font-weight="bold">${key}</text>`);
 		out.push(`<text x="${cols[1]}" y="${ty}" text-anchor="end">${n.toLocaleString("en-US")}</text>`);
 		out.push(`<text x="${cols[2]}" y="${ty}" text-anchor="end">${formatPercent(n, total)}</text>`);
 		out.push(`</g>`);
