@@ -382,6 +382,21 @@
 <text x="1016.0" y="109.4" font-size="18" fill="#3889ff" dominant-baseline="middle"><tspan font-weight="bold">1 word</tspan><tspan x="1016.0" dy="22" font-size="16">(99.33%)</tspan></text>
 <line x1="1034.5" y1="178.1" x2="1005.6" y2="192.5" stroke="#ff3b30" stroke-width="2"/><path d="M998.5 196.1 L1009.6 196.1 L1005.2 187.1 z" fill="#ff3b30"/>
 <text x="1040.5" y="178.1" font-size="18" font-weight="bold" fill="#ff3b30" dominant-baseline="middle">2 words</text>
+<g font-size="16" fill="#a855f7">
+<text x="1296" y="109.7" font-weight="bold">3 words</text>
+<text x="1466" y="109.7" text-anchor="end">15,588</text>
+<text x="1546" y="109.7" text-anchor="end">0.45%</text>
+</g>
+<g font-size="16" fill="#ec4899">
+<text x="1296" y="133.7" font-weight="bold">4 words</text>
+<text x="1466" y="133.7" text-anchor="end">2,416</text>
+<text x="1546" y="133.7" text-anchor="end">0.070%</text>
+</g>
+<g font-size="16" fill="#888">
+<text x="1296" y="157.7" font-weight="bold">5+ words</text>
+<text x="1466" y="157.7" text-anchor="end">1,877</text>
+<text x="1546" y="157.7" text-anchor="end">0.055%</text>
+</g>
 <line x1="920.2" x2="920.2" y1="424" y2="428" stroke="#888"/>
 <text x="920.2" y="470" font-size="16" text-anchor="middle">1</text>
 <line x1="996.5" x2="996.5" y1="424" y2="428" stroke="#888"/>
